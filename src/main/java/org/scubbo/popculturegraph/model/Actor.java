@@ -1,9 +1,5 @@
 package org.scubbo.popculturegraph.model;
 
-import lombok.Data;
-
-@Data
-public class Actor {
-    private final String id;
-    private final String name;
+public class Actor extends Entity {
+    public Actor(final String id, final String name) {super(id, name);}
 }

@@ -1,9 +1,5 @@
 package org.scubbo.popculturegraph.model;
 
-import lombok.Data;
-
-@Data
-public class Title {
-    private final String id;
-    private final String name;
+public class Title extends Entity {
+    public Title(final String id, final String name) {super(id, name);}
 }
