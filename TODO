@@ -1,0 +1,2 @@
+Implement proper wrapping classes for Graph types
+ - In particular, note that we'll get unexpected behaviour if Edge names are not unique - which could easily happen with characters with common names, e.g. "Boy"
