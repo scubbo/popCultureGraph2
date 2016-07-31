@@ -1,4 +1,4 @@
-package org.scubbo.popculturegraph;
+package org.scubbo.popculturegraph.nettest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -7,6 +7,7 @@ import java.util.Collection;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
+import org.scubbo.popculturegraph.DataFetcher;
 import org.scubbo.popculturegraph.model.Actor;
 import org.scubbo.popculturegraph.model.Title;
 import org.scubbo.popculturegraph.net.JSoupWrapper;
