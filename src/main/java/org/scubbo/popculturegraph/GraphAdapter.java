@@ -95,7 +95,11 @@ public class GraphAdapter {
 
         List<Entity> neighbours = Graphs.neighborListOf(graph, actor);
 
-        for (Entity neighbour: neighbours) {
+        // DEBUG
+        System.out.println("Found " + String.valueOf(neighbours.size()) + " neighbours");
+
+        for (int i = 0; i< neighbours.size(); i++) {
+            Entity neighbour = neighbours.get(i);
 
             // Only spread if we haven't already spread from here
             if (!POPULATED_TITLES.contains(neighbour)) {
@@ -105,6 +109,10 @@ public class GraphAdapter {
                     graph.addEdge(neighbour, character.getLeft(), character.getRight());
                 }
                 POPULATED_TITLES.add((Title) neighbour);
+            }
+            if (i%5 == 0) {
+                // DEBUG
+                System.out.println("completed neighbour " + String.valueOf(i));
             }
         }
         SPREAD_ACTORS.add(actor);
@@ -150,7 +158,7 @@ public class GraphAdapter {
 
     }
 
-    public List<Title> getSociableNeighboursOfActor(Actor actor, Integer sociabilityLevel) throws PopulationException {
+    public List<Pair<Title, String>> getSociableNeighboursOfActor(Actor actor, Integer sociabilityLevel) throws PopulationException {
         if (!SPREAD_ACTORS.contains(actor)) {
             // Something's gone wrong - we have been asked to get sociable neighbours
             // of a node that has not yet had its neighbours populated.
@@ -164,19 +172,11 @@ public class GraphAdapter {
         Integer requiredSociabilityLevel = getTitleSociabilityLevel(sociabilityLevel);
         Integer previousSociabilityLevel = getTitleSociabilityLevel(sociabilityLevel - 1);
 
-        List<Title> response = Lists.newArrayList();
-        for (Entity neighbour: neighbours) {
-            Integer degreeOfN = graph.degreeOf(neighbour);
-            if (degreeOfN >= requiredSociabilityLevel && degreeOfN < previousSociabilityLevel) {
-                response.add((Title) neighbour);
-            }
-        }
-
         return neighbours.stream()
                 .filter((n) ->
                         graph.degreeOf(n) >= requiredSociabilityLevel &&
                         graph.degreeOf(n) < previousSociabilityLevel)
-                .map((n) -> (Title) n)
+                .map((n) -> Pair.of((Title) n, graph.getEdge(n, actor)))
                 .collect(Collectors.toList());
     }
 

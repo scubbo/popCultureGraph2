@@ -180,80 +180,45 @@ window.MAXIMUM_DEGREE = 1;
 
   $(document).ready(function(){
 
-    $.get('api', {}, function(data) {console.log(data);});
-
     var sys = arbor.ParticleSystem(1000, 600, 0.5) // create the system with sensible repulsion/stiffness/friction
     window.sys = sys // make global
     sys.parameters({gravity:true}) // use center-gravity to make the graph settle nicely (ymmv)
     sys.renderer = Renderer("#viewport") // our newly created renderer will have its .init() method called shortly by sys...
 
-    $('#submitButton').click(function() {
-      maxDegree = $('#maximumDegreesDropdown').val();
-      if (maxDegree > 2) {
-        alert('Sorry! Degrees above 2 are not currently supported!');
-        return false;
-      } else {
-        window.MAXIMUM_DEGREE = maxDegree;
-      }
-      resetDataAndGraph();
-      addStartingNodes()
+    $.get('api/hardcoded', {}, function(data) {
+      nodes = data['data']['nodes'];
+      edges = data['data']['edges']
+
+      $.each(nodes, function(i, e) {
+        window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[]});
+      })
+
+      $.each(edges, function(i, e) {
+        window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
+      })
     });
 
+    $('#submitButton').click(function() {
+      $.get('api', {}, function(data) {
+        console.log(data);
+        nodes = data['data']['nodes'];
+        edges = data['data']['edges']
 
-    // add some nodes to the graph and watch it go...
-    resetDataAndGraph();
+        $.each(nodes, function(i, e) {
+          window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[]});
+        })
+
+        $.each(edges, function(i, e) {
+          window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
+        })
+      })
+    });
 
     $('.nodeName').keydown(nodeNameKeyDown);
 
   })
 
 })(this.jQuery)
-
-function resetDataAndGraph() {
-  window.actors = {}
-  window.titles = {}
-  window.rootActors = []
-  window.sys.eachNode(function(node,pt) {
-    window.sys.pruneNode(node);
-  })
-}
-
-function addStartingNodes() {
-  firstNodeNameGuess = $('#firstNodeName').val()
-  secondNodeNameGuess = $('#secondNodeName').val()
-  getRootNodeData(firstNodeNameGuess, 0)
-  getRootNodeData(secondNodeNameGuess, 1)
-}
-
-function getRootNodeData(nameGuess, rootNodeValue) {
-  console.log('getting Root Node Data for ' + nameGuess)
-  $.post('cgi-bin/getActorIdFromName.py',{'nameGuess':nameGuess},
-    function(data) {
-      window.rootActors[rootNodeValue] = data
-      if (window.rootActors.length == 2) {
-        placeRootNodes()
-        proliferate(window.rootActors[0].id, 'actor');
-        proliferate(window.rootActors[1].id, 'actor');
-      }
-    }
-  )
-}
-
-function placeRootNodes() {
-  console.log('placing root nodes')
-  for (var i = 0; i<window.rootActors.length; i++) {
-    data = window.rootActors[i]
-    var actorName = data['name']
-    var actorId = data['id']
-    window.sys.addNode('actor_'+actorId, {color:'#f00',name:actorName,originalColor:'#f00',originalW:3,edges:[]})
-    var actorDetails = {}
-    actorDetails['name'] = actorName
-    actorDetails['d' + i.toString()] = 0
-    actorDetails['d' + (1-i).toString()] = window.NOT_CONNECTED
-    actorDetails['active'] = true
-    window.actors[actorId] = actorDetails
-  }
-}
 
 function nodeNameKeyDown(e) {
   targetElem = e.target
@@ -262,188 +227,6 @@ function nodeNameKeyDown(e) {
     currentVal = $(targetElem).val() + currentLetter;
   }
   //TODO: Use this for predictions
-}
-
-//TODO: Make this generalised, taking title or actor
-function proliferate(id, type) {
-  console.log('proliferating with ', id, type);
-  if (type == 'actor') {
-    var actorId = id;
-    console.log('actorId is ' + actorId)
-    $.post('cgi-bin/getShowsForActor.py',
-      {'actorId':actorId},
-      function(data) {
-        var newTitleNodesToAdd = []
-
-        for (var index = 0; index<data.length; index++) {
-          elem = data[index]
-          if (window.titles[elem.titleId] == undefined) {
-            title = {'title':elem.title}
-            title['d0'] = window.NOT_CONNECTED
-            title['d1'] = window.NOT_CONNECTED
-            title['active'] = false
-            title['links'] = [{'actorId':actorId,'charName':elem.charName}]
-            title['titleId'] = elem.titleId
-            title['isNew'] = true;
-            window.titles[elem.titleId] = title
-          } else {
-            window.titles[elem.titleId]['links'].push({'actorId':actorId,'charName':elem.charName})
-          }
-          window.titles[elem.titleId]['d0'] = Math.min(window.titles[elem.titleId]['d0'], window.actors[actorId]['d0'] + 1)
-          window.titles[elem.titleId]['d1'] = Math.min(window.titles[elem.titleId]['d1'], window.actors[actorId]['d1'] + 1)
-          if (elem.titleId.substr(0,4) == '0303') {
-            console.log('with actorId ' + actorId + ', ', window.titles[elem.titleId])
-          }
-          if (window.titles[elem.titleId]['d0'] != window.NOT_CONNECTED && window.titles[elem.titleId]['d1'] != window.NOT_CONNECTED) {
-            newTitleNodesToAdd.push(elem);
-            console.log('pushed ' + elem + ' onto newTitleNodesToAdd')
-          }
-        };
-        addTitleNodes(newTitleNodesToAdd);
-        setTimeout(scanForNewNodesToProliferate, 1);
-      }
-    );
-    return false;
-  }
-
-  if (type == 'title') {
-    titleId = id;
-    $.post('cgi-bin/getActorsForShow.py',
-      {'titleId':titleId},
-      function(data) {
-        var newActorNodesToAdd = []
-
-        for (var index = 0; index<data.length; index++) {
-          elem = data[index]
-          if (window.titles[elem.actorId] == undefined) {
-            actor = {'name':elem.name}
-            actor['d0'] = window.NOT_CONNECTED
-            actor['d1'] = window.NOT_CONNECTED
-            actor['active'] = false
-            actor['links'] = [{'titleId':titleId,'charName':elem.charName}]
-            actor['isNew'] = true;
-            window.actors[elem.actorId] = actor
-          } else {
-            window.actors[elem.actorId]['links'].push({'titleId':titleId,'charName':elem.charName})
-          }
-          window.actors[elem.actorId]['d0'] = Math.min(window.actors[elem.actorId]['d0'], window.titles[titleId]['d0'] + 1)
-          window.actors[elem.actorId]['d1'] = Math.min(window.actors[elem.actorId]['d1'], window.titles[titleId]['d1'] + 1)
-          if (window.actors[elem.actorId]['d0'] != window.NOT_CONNECTED && window.actors[elem.actorId]['d1'] != window.NOT_CONNECTED) {
-            newActorNodesToAdd.push(elem);
-          }
-        };
-        addActorNodes(newActorNodesToAdd);
-        setTimeout(scanForNewNodesToProliferate, 1);
-      }
-    );
-    return false;
-
-  }
-
-  alert('Unknown "type" passed to proliferate: ' + type);
-}
-
-function addTitleNodes(listOfTitleNodes) {
-  var i = 0;
-
-  function addTitleNodesInner() {
-    if (i<listOfTitleNodes.length) {
-      setTimeout(function() {
-        addTitleNode(listOfTitleNodes[i]);
-        i++;
-        addTitleNodesInner();
-      }, 300+Math.floor(Math.random()*200));
-    }
-  }
-
-  addTitleNodesInner();
-}
-
-function addTitleNode(title) {
-  window.titles[title.titleId]['active'] = true
-  nodeId = 'title_'+title.titleId;
-  window.sys.addNode(nodeId, {color:'#0f0',name:title.title,originalColor:'#0f0',originalW:3,edges:[]})
-  $.each(window.titles[title.titleId]['links'], function(index, linkElem) {
-    edge = window.sys.addEdge(nodeId,'actor_'+linkElem.actorId,{name:linkElem.charName})
-    window.sys.getNode(nodeId).data.edges.push(edge);
-    window.sys.getNode('actor_'+linkElem.actorId).data.edges.push(edge);
-  });
-}
-
-function addActorNodes(listOfActorNodes) {
-  var i = 0;
-
-  function addActorNodesInner() {
-    if (i<listOfActorNodes.length) {
-      setTimeout(function() {
-        addActorNode(listOfActorNodes[i]);
-        i++;
-        addActorNodesInner();
-      }, 300+Math.floor(Math.random()*200));
-    }
-  }
-
-  addActorNodesInner();
-}
-
-function addActorNode(actor) {
-  window.actors[actor.actorId]['active'] = true
-  nodeId = 'actor_'+actor.actorId;
-  window.sys.addNode(nodeId, {color:'#f00',name:actor.name,originalColor:'#f00',originalW:3,edges:[]})
-  $.each(window.actors[actor.actorId]['links'], function(index, linkElem) {
-    edge = window.sys.addEdge(nodeId,'title_'+linkElem.titleId,{name:linkElem.charName})
-    window.sys.getNode(nodeId).data.edges.push(edge);
-    window.sys.getNode('title_'+linkElem.titleId).data.edges.push(edge);
-  });
-}
-
-function scanForNewNodesToProliferate() {
-  titleNodesToProliferate = []
-  actorNodesToProliferate = []
-  $.each(window.titles, function(key, value) {
-    if (value['isNew'] && (findMaxDegree(value) < window.MAXIMUM_DEGREE)) {
-      value['isNew'] = false;
-      titleNodesToProliferate.push(value);
-    }
-  });
-  $.each(window.actors, function(key, value) {
-    if (value['isNew'] && (findMaxDegree(value) < window.MAXIMUM_DEGREE)) {
-      value['isNew'] = false;
-      actorNodesToProliferate.push(value);
-    }
-  });
-  if (titleNodesToProliferate.length > 0 || actorNodesToProliferate.length > 0) {
-    proliferateNewNodes(titleNodesToProliferate, 'title');
-    proliferateNewNodes(actorNodesToProliferate, 'actor');
-    scanForNewNodesToProliferate();
-  }
-}
-
-function proliferateNewNodes(nodes, type) {
-  var i = 0;
-
-  function proliferateNewNodesInner() {
-    if (i<nodes.length) {
-      setTimeout(function() {
-        console.log('about to proliferate with ', nodes[i], type)
-        proliferate(nodes[i][type + 'Id'], type);
-        i++;
-        proliferateNewNodesInner();
-      }, 300 + Math.floor(Math.random()*200));
-    }
-  }
-
-  proliferateNewNodesInner()
-}
-
-function findMaxDegree(value) {
-  if (value['d0'] == window.MAXIMUM_DEGREE) {
-    if (value['d1'] == window.MAXIMUM_DEGREE) {return 0;}
-    else {return value['d1'];}
-  } else {
-    if (value['d1'] == window.MAXIMUM_DEGREE) {return value['d0'];}
-    else {return Math.max(value['d0'], value['d1']);}
-  }
 }
 
 function temporarilyHighlightNode(targetId) {
