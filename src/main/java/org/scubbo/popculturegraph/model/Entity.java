@@ -1,9 +1,15 @@
 package org.scubbo.popculturegraph.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 @Data
-public abstract class Entity {
-    private final String id;
-    private final String name;
+@NoArgsConstructor
+@AllArgsConstructor
+public abstract class Entity implements Serializable {
+    private String id;
+    private String name;
 }
