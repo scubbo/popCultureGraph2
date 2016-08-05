@@ -24,6 +24,8 @@ import org.scubbo.popculturegraph.model.Title;
 
 public class DatabaseConnector {
 
+    private final String connectionString;
+
     public static void main(String[] args) {
         final DatabaseConnector d = new DatabaseConnector();
         d.setActorsForTitle(Lists.newArrayList(
@@ -38,15 +40,16 @@ public class DatabaseConnector {
 
     @VisibleForTesting
     public DatabaseConnector(String connectionString) {
+        this.connectionString = connectionString;
+
         Connection c = null;
         Statement stmt = null;
         String sql = null;
 
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection(connectionString);
+            c = DriverManager.getConnection(this.connectionString);
             c.setAutoCommit(false);
-            System.out.println("Opened database successfully");
 
             stmt = c.createStatement();
             sql = "SELECT name FROM sqlite_master WHERE type='table'";
@@ -101,8 +104,7 @@ public class DatabaseConnector {
         try {
             try {
                 Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection("jdbc:sqlite:test.db");
-                System.out.println("Opened database successfully");
+                c = DriverManager.getConnection(connectionString);
 
                 stmt = c.createStatement();
                 String sql = "SELECT actors, date FROM actors_for_title WHERE id='" + id + "'";
@@ -159,9 +161,8 @@ public class DatabaseConnector {
         try {
             try {
                 Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection("jdbc:sqlite:test.db");
+                c = DriverManager.getConnection(connectionString);
                 c.setAutoCommit(false);
-                System.out.println("Opened database successfully");
 
                 try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
                     try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
@@ -215,8 +216,7 @@ public class DatabaseConnector {
         try {
             try {
                 Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection("jdbc:sqlite:test.db");
-                System.out.println("Opened database successfully");
+                c = DriverManager.getConnection(connectionString);
 
                 stmt = c.createStatement();
                 String sql = "SELECT titles, date FROM titles_for_actor WHERE id='" + id + "'";
@@ -273,9 +273,8 @@ public class DatabaseConnector {
         try {
             try {
                 Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection("jdbc:sqlite:test.db");
+                c = DriverManager.getConnection(connectionString);
                 c.setAutoCommit(false);
-                System.out.println("Opened database successfully");
 
                 try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
                     try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
@@ -330,9 +329,8 @@ public class DatabaseConnector {
         try {
             try {
                 Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection("jdbc:sqlite:test.db");
+                c = DriverManager.getConnection(connectionString);
                 c.setAutoCommit(false);
-                System.out.println("Opened database successfully");
 
                 stmt = c.prepareStatement("DELETE FROM actors_for_title;");
                 stmt.execute();

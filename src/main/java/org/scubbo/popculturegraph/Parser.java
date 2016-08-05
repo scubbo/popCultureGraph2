@@ -31,8 +31,13 @@ public class Parser {
                         }
                         Element actorTag = actorTags.first();
 
-                        String actorId = actorTag.getElementsByTag("a").get(0).attr("href").split("/")[2].replace("nm", "");
-                        String actorName = actorTag.getElementsByTag("span").get(0).text();
+                        String actorId = actorTag.getElementsByTag("a").first().attr("href").split("/")[2].replace("nm", "");
+                        final Elements actorNameTags = actorTag.getElementsByTag("span");
+                        if (actorNameTags.isEmpty()) {
+                            //TODO as above and below. Paul O'Brien (nm0639770) in One Life To Live (tt0062595)
+                            return;
+                        }
+                        String actorName = actorNameTags.first().text();
 
                         Elements characterTags = row.getElementsByClass("character");
                         if (characterTags.isEmpty()) {
