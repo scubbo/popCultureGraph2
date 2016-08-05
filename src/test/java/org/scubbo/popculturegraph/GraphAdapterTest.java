@@ -10,6 +10,7 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.junit.Before;
@@ -88,17 +89,17 @@ public class GraphAdapterTest {
 
         adapter.spreadFromActorNode(actor);
 
-        List<Title> sociableNeighboursOfActor = adapter.getSociableNeighboursOfActor(actor, 1);
+        List<Pair<Title,String>> sociableNeighboursOfActor = adapter.getSociableNeighboursOfActor(actor, 1);
         assertThat(sociableNeighboursOfActor).hasSize(1);
-        assertThat(sociableNeighboursOfActor.get(0).getId()).isEqualTo("t-id-1");
+        assertThat(sociableNeighboursOfActor.get(0).getLeft().getId()).isEqualTo("t-id-1");
 
         sociableNeighboursOfActor = adapter.getSociableNeighboursOfActor(actor, 2);
         assertThat(sociableNeighboursOfActor).hasSize(1);
-        assertThat(sociableNeighboursOfActor.get(0).getId()).isEqualTo("t-id-2");
+        assertThat(sociableNeighboursOfActor.get(0).getLeft().getId()).isEqualTo("t-id-2");
 
         sociableNeighboursOfActor = adapter.getSociableNeighboursOfActor(actor, 3);
         assertThat(sociableNeighboursOfActor).hasSize(1);
-        assertThat(sociableNeighboursOfActor.get(0).getId()).isEqualTo("t-id-3");
+        assertThat(sociableNeighboursOfActor.get(0).getLeft().getId()).isEqualTo("t-id-3");
 
         sociableNeighboursOfActor = adapter.getSociableNeighboursOfActor(actor, 4);
         assertThat(sociableNeighboursOfActor).hasSize(0);

@@ -1,6 +1,7 @@
 package org.scubbo.popculturegraph;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -10,6 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
+import org.scubbo.popculturegraph.database.DatabaseConnector;
 import org.scubbo.popculturegraph.model.Actor;
 import org.scubbo.popculturegraph.model.Title;
 import org.scubbo.popculturegraph.net.JSoupWrapper;
@@ -20,13 +22,22 @@ public class DataFetcher {
     private static final String ACTORS_FOR_TITLE_PREFIX = "http://www.imdb.com/title/tt";
     private static final String ACTORS_FOR_TITLE_SUFFIX = "/fullcredits";
 
+    private final DatabaseConnector databaseConnector;
     private final JSoupWrapper jSoupWrapper;
 
-    public DataFetcher(JSoupWrapper jSoupWrapper) {
+    public DataFetcher(
+            DatabaseConnector databaseConnector,
+            JSoupWrapper jSoupWrapper) {
+        this.databaseConnector = databaseConnector;
         this.jSoupWrapper = jSoupWrapper;
     }
 
     public Collection<Pair<Actor, String>> getActorsForTitle(String id) throws IOException {
+        Pair<Instant, Collection<Pair<Actor, String>>> databaseActorsForTitle =
+                databaseConnector.getActorsForTitle(id);
+        if (databaseActorsForTitle != null) {
+            return databaseActorsForTitle.getRight();
+        }
         Collection<Pair<Actor, String>> actorsWithCharNames = new ArrayList<>();
 
         Document doc = jSoupWrapper.getDoc(ACTORS_FOR_TITLE_PREFIX + id + ACTORS_FOR_TITLE_SUFFIX);
@@ -81,6 +92,13 @@ public class DataFetcher {
 
 
     public Collection<Pair<Title, String>> getTitlesForActor(String id) throws IOException {
+
+        Pair<Instant, Collection<Pair<Title, String>>> databaseTitlesForActor =
+                databaseConnector.getTitlesForActor(id);
+        if (databaseTitlesForActor != null) {
+            return databaseTitlesForActor.getRight();
+        }
+
         Collection<Pair<Title, String>> titlesWithCharNames = new ArrayList<>();
 
         Document doc = jSoupWrapper.getDoc(TITLES_FOR_ACTOR_PREFIX + id);
