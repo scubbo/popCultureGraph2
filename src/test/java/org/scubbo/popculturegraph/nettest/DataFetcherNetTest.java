@@ -8,6 +8,7 @@ import java.util.Collection;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.scubbo.popculturegraph.DataFetcher;
+import org.scubbo.popculturegraph.Parser;
 import org.scubbo.popculturegraph.database.DatabaseConnector;
 import org.scubbo.popculturegraph.model.Actor;
 import org.scubbo.popculturegraph.model.Title;
@@ -15,7 +16,7 @@ import org.scubbo.popculturegraph.net.JSoupWrapper;
 
 public class DataFetcherNetTest {
 
-    private DataFetcher fetcher = new DataFetcher(new DatabaseConnector("jdbc:sqlite:nettest.db"), new JSoupWrapper());
+    private DataFetcher fetcher = new DataFetcher(new DatabaseConnector("jdbc:sqlite:nettest.db"), new JSoupWrapper(), new Parser());
 
     @Test
     public void testNetConnectionTitlesForActor() throws Exception {
