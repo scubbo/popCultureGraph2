@@ -63,4 +63,9 @@ public class NetAndParserTest {
         assertThat(actorsForTitle).isNotEmpty();
     }
 
+    @Test
+    public void testUnknownNullPointer() throws Exception {
+        parser.parseDocForActors(jSoupWrapper.getDoc(ACTORS_FOR_TITLE_PREFIX + "0364828" + ACTORS_FOR_TITLE_SUFFIX));
+    }
+
 }

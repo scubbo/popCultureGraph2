@@ -31,7 +31,13 @@ public class Parser {
                         }
                         Element actorTag = actorTags.first();
 
-                        String actorId = actorTag.getElementsByTag("a").first().attr("href").split("/")[2].replace("nm", "");
+                        final Elements actorNameLinks = actorTag.getElementsByTag("a");
+                        if (actorNameLinks.isEmpty()) {
+                            //TODO no idea what's going on here (that's something of a trend, as you'll see), but
+                            // Darrin Bates (nm2721051) is badly behaved
+                            return;
+                        }
+                        String actorId = actorNameLinks.first().attr("href").split("/")[2].replace("nm", "");
                         final Elements actorNameTags = actorTag.getElementsByTag("span");
                         if (actorNameTags.isEmpty()) {
                             //TODO as above and below. Paul O'Brien (nm0639770) in One Life To Live (tt0062595)
