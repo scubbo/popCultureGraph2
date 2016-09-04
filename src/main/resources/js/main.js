@@ -6,6 +6,7 @@ window.SELECTION_HIGHLIGHT_TRANSITION_TIME = 0.5;
 window.SELECTION_HIGHLIGHT_TIME = 2000;
 window.NOT_CONNECTED = 99999;
 window.MAXIMUM_DEGREE = 1;
+window.MOUSE_MODE = 'drag';
 
 (function($){
 
@@ -24,13 +25,15 @@ window.MAXIMUM_DEGREE = 1;
         //
         // save a reference to the particle system for use in the .redraw() loop
         particleSystem = system
+        // And save a reference to window (global) so we can use this in spread mode
+        window.particleSystem = particleSystem;
 
         // inform the system of the screen dimensions so it can map coords for us.
         // if the canvas is ever resized, screenSize should be called again with
         // the new dimensions
-        particleSystem.screenSize(canvas.width, canvas.height) 
+        particleSystem.screenSize(canvas.width, canvas.height)
         particleSystem.screenPadding(80) // leave an extra 80px of whitespace per side
-        
+
         // set up some event handlers to allow for node-dragging
         that.initMouseHandling()
       },
@@ -168,6 +171,7 @@ window.MAXIMUM_DEGREE = 1;
             return false
           }
         }
+        window.originalHandler = handler;
         
         // start listening
         $(canvas).mousedown(handler.clicked);
@@ -200,7 +204,6 @@ window.MAXIMUM_DEGREE = 1;
 
     $('#submitButton').click(function() {
       $.get('api', {}, function(data) {
-        console.log(data);
         nodes = data['data']['nodes'];
         edges = data['data']['edges']
 
@@ -213,6 +216,54 @@ window.MAXIMUM_DEGREE = 1;
         })
       })
     });
+
+    $('#modeButton').click(function() {
+      if (window.MOUSE_MODE == 'drag') {
+        $('#modeButton').val('Switch to drag mode');
+        $('canvas').unbind('mousedown');
+        $('canvas').unbind('mousemove');
+        $('canvas').mousedown(function(e){
+          var pos = $('canvas').offset();
+          _mouseP = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
+          clicked = window.particleSystem.nearest(_mouseP).distance < window.CLICK_DISTANCE ? particleSystem.nearest(_mouseP) : null
+
+
+          if (clicked && clicked.node !== null){
+            subs = clicked.node.name.split('_');
+            name = clicked.node.data['name'];
+            console.log(subs);
+            if (subs[0] == 'title') {
+              url = '/api/title';
+            } else {
+              url = '/api/actor';
+            }
+
+            $.post(url, {'id':subs[1],'name':name}, function(data) {
+              nodes = data['data']['nodes'];
+              edges = data['data']['edges']
+
+              $.each(nodes, function(i, e) {
+                window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[]});
+              })
+
+              $.each(edges, function(i, e) {
+                window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
+              })
+            });
+
+            console.log(clicked.node.name);
+          }});
+        $('canvas').bind('mousemove', function(){});
+        window.MOUSE_MODE = 'spread';
+      } else {
+        $('#modeButton').val('Switch to spread mode');
+        $('canvas').unbind('mousedown');
+        $('canvas').unbind('mousemove');
+        $('canvas').mousedown(window.originalHandler.clicked);
+        $('canvas').bind('mousemove', window.originalHandler.moved);
+        window.MOUSE_MODE = 'drag';
+      }
+    })
 
     $('.nodeName').keydown(nodeNameKeyDown);
 
