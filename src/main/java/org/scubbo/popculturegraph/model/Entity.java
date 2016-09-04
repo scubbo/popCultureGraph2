@@ -12,4 +12,8 @@ import java.io.Serializable;
 public abstract class Entity implements Serializable {
     private String id;
     private String name;
+
+    public String toString() {
+        return id + " (" + name + ")";
+    }
 }

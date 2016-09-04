@@ -162,7 +162,7 @@ public class GraphAdapter {
         if (!SPREAD_ACTORS.contains(actor)) {
             // Something's gone wrong - we have been asked to get sociable neighbours
             // of a node that has not yet had its neighbours populated.
-            throw new PopulationException("Asked to get sociable neighbours for " + actor.getId() + " which has not yet been populated");
+            throw new PopulationException("Asked to get sociable neighbours for actor " + actor + " which has not yet been populated");
         }
         if (sociabilityLevel < 1) {
             throw new IllegalArgumentException();
@@ -190,11 +190,11 @@ public class GraphAdapter {
         return TITLE_SOCIABILITY_LEVELS.get(level - 1);
     }
 
-    public List<Actor> getSociableNeighboursOfTitle(Title title, Integer sociabilityLevel) throws PopulationException {
+    public List<Pair<Actor, String>> getSociableNeighboursOfTitle(Title title, Integer sociabilityLevel) throws PopulationException {
         if (!SPREAD_TITLES.contains(title)) {
             // Something's gone wrong - we have been asked to get sociable neighbours
             // of a node that has not yet had its neighbours populated.
-            throw new PopulationException("Asked to get sociable neighbours for " + title.getId() + " which has not yet been populated");
+            throw new PopulationException("Asked to get sociable neighbours for title " + title + " which has not yet been populated");
         }
         if (sociabilityLevel < 1) {
             throw new IllegalArgumentException();
@@ -208,7 +208,7 @@ public class GraphAdapter {
                 .filter((n) ->
                         graph.degreeOf(n) >= requiredSociabilityLevel &&
                         graph.degreeOf(n) < previousSociabilityLevel)
-                .map((n) -> (Actor) n)
+                .map((n) -> Pair.of((Actor) n, graph.getEdge(n, title)))
                 .collect(Collectors.toList());
     }
 

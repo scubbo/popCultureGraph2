@@ -134,17 +134,17 @@ public class GraphAdapterTest {
 
         adapter.spreadFromTitleNode(title);
 
-        List<Actor> sociableNeighboursOfTitle = adapter.getSociableNeighboursOfTitle(title, 1);
+        List<Pair<Actor, String>> sociableNeighboursOfTitle = adapter.getSociableNeighboursOfTitle(title, 1);
         assertThat(sociableNeighboursOfTitle).hasSize(1);
-        assertThat(sociableNeighboursOfTitle.get(0).getId()).isEqualTo("a-id-1");
+        assertThat(sociableNeighboursOfTitle.get(0).getLeft().getId()).isEqualTo("a-id-1");
 
         sociableNeighboursOfTitle = adapter.getSociableNeighboursOfTitle(title, 2);
         assertThat(sociableNeighboursOfTitle).hasSize(1);
-        assertThat(sociableNeighboursOfTitle.get(0).getId()).isEqualTo("a-id-2");
+        assertThat(sociableNeighboursOfTitle.get(0).getLeft().getId()).isEqualTo("a-id-2");
 
         sociableNeighboursOfTitle = adapter.getSociableNeighboursOfTitle(title, 3);
         assertThat(sociableNeighboursOfTitle).hasSize(1);
-        assertThat(sociableNeighboursOfTitle.get(0).getId()).isEqualTo("a-id-3");
+        assertThat(sociableNeighboursOfTitle.get(0).getLeft().getId()).isEqualTo("a-id-3");
 
         sociableNeighboursOfTitle = adapter.getSociableNeighboursOfTitle(title, 4);
         assertThat(sociableNeighboursOfTitle).hasSize(0);
