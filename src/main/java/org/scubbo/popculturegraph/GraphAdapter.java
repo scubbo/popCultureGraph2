@@ -19,7 +19,7 @@ public class GraphAdapter {
     }
 
     public List<Pair<Title, String>> getPopularNeighboursOfActor(Actor actor, Integer popularityLevel) throws PopulationException, IOException {
-        if (popularityLevel < 1) {
+        if (popularityLevel < 0) {
             throw new IllegalArgumentException();
         }
 
@@ -28,13 +28,13 @@ public class GraphAdapter {
         return data.stream()
                 //.filter(based on ids of current neighbours)
                 // also pass back Character Name
-                .limit(3 * popularityLevel)
+                .limit(3 * (popularityLevel + 1))
                 .map((t) -> Pair.of(t.getLeft(), t.getRight()))
                 .collect(Collectors.toList());
     }
 
     public List<Pair<Actor, String>> getPopularNeighboursOfTitle(Title title, Integer popularityLevel) throws PopulationException, IOException {
-        if (popularityLevel < 1) {
+        if (popularityLevel < 0) {
             throw new IllegalArgumentException();
         }
 
@@ -43,7 +43,7 @@ public class GraphAdapter {
         return data.stream()
                 //.filter(based on ids of current neighbours)
                 // also pass back Character Name
-                .limit(3 * popularityLevel)
+                .limit(3 * (popularityLevel + 1))
                 .map((a) -> Pair.of(a.getLeft(), a.getRight()))
                 .collect(Collectors.toList());
     }

@@ -29,10 +29,6 @@ public class RequestHandler extends AbstractHandler {
     public static final String TITLE_COLOR = "#f00";
     public static final String ACTOR_COLOR = "#00f";
     private final GraphAdapter adapter = new GraphAdapter(new DataFetcher(new DatabaseConnector("jdbc:sqlite:prod.db"), new JSoupWrapper(), new Parser()));
-    //TODO: Hardcoded, replace
-    private static final Actor actor = new Actor("0277213", "Nathan Fillion");
-    private static final Title title = new Title("0379786", "Serenity");
-
 
     public void handle(String target,
                        Request baseRequest,
@@ -103,11 +99,10 @@ public class RequestHandler extends AbstractHandler {
         if (splitTarget.length > 2 && splitTarget[2].equals("title")) {
             String titleId = request.getParameter("id");
             String name = request.getParameter("name");
-            // DEBUG
-            System.out.println("Received a request for sociable neighbours of title " + name);
+            Integer clickth = Integer.valueOf(request.getParameter("clickth"));
             List<Pair<Actor, String>> popularNeighboursOfTitle;
             try {
-                popularNeighboursOfTitle = adapter.getPopularNeighboursOfTitle(new Title(titleId, name), 1);
+                popularNeighboursOfTitle = adapter.getPopularNeighboursOfTitle(new Title(titleId, name), clickth);
 
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -150,9 +145,10 @@ public class RequestHandler extends AbstractHandler {
         if (splitTarget.length > 2 && splitTarget[2].equals("actor")) {
             String actorId = request.getParameter("id");
             String name = request.getParameter("name");
+            Integer clickth = Integer.valueOf(request.getParameter("clickth"));
             List<Pair<Title, String>> popularNeighboursOfActor;
             try {
-                popularNeighboursOfActor = adapter.getPopularNeighboursOfActor(new Actor(actorId, name), 1);
+                popularNeighboursOfActor = adapter.getPopularNeighboursOfActor(new Actor(actorId, name), clickth);
 
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_OK);

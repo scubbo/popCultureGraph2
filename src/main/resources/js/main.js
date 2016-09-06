@@ -184,7 +184,7 @@ window.MOUSE_MODE = 'drag';
 
   $(document).ready(function(){
 
-    var sys = arbor.ParticleSystem(1000, 600, 0.7) // create the system with sensible repulsion/stiffness/friction
+    var sys = arbor.ParticleSystem(1000, 600, 0.5) // create the system with sensible repulsion/stiffness/friction
     window.sys = sys // make global
     sys.parameters({gravity:true}) // use center-gravity to make the graph settle nicely (ymmv)
     sys.renderer = Renderer("#viewport") // our newly created renderer will have its .init() method called shortly by sys...
@@ -194,7 +194,7 @@ window.MOUSE_MODE = 'drag';
       edges = data['data']['edges']
 
       $.each(nodes, function(i, e) {
-        window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[]});
+        window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[],clickth:0});
       })
 
       $.each(edges, function(i, e) {
@@ -231,24 +231,25 @@ window.MOUSE_MODE = 'drag';
           if (clicked && clicked.node !== null){
             subs = clicked.node.name.split('_');
             name = clicked.node.data['name'];
-            console.log(subs);
+            clickth = clicked.node.data['clickth'];
             if (subs[0] == 'title') {
               url = '/api/title';
             } else {
               url = '/api/actor';
             }
 
-            $.post(url, {'id':subs[1],'name':name}, function(data) {
+            $.post(url, {'id':subs[1],'name':name,'clickth':clickth}, function(data) {
               nodes = data['data']['nodes'];
-              edges = data['data']['edges']
+              edges = data['data']['edges'];
 
               $.each(nodes, function(i, e) {
-                window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[]});
+                window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[],clickth:0});
               })
 
               $.each(edges, function(i, e) {
                 window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
               })
+              clicked.node.data['clickth']++;
             });
 
             console.log(clicked.node.name);
