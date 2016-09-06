@@ -2,12 +2,14 @@ package org.scubbo.popculturegraph;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import org.scubbo.popculturegraph.model.Actor;
 import org.scubbo.popculturegraph.model.Title;
@@ -75,38 +77,28 @@ public class Parser {
         return actorsWithCharNames;
     }
 
-    public Collection<Pair<Title, String>> parseDocForTitles(final Document doc) {
+    public List<Pair<Title, Pair<String, Integer>>> parseDocForTitles(final Document tvDoc) {
 
-        Collection<Pair<Title, String>> titlesWithCharNames = new ArrayList<>();
+        Element mainDiv = tvDoc.getElementsByClass("lister-list").get(0);
 
-        Element mainDiv = doc.getElementsByClass("filmo-category-section").get(0);
+        return mainDiv.children().stream().filter(c -> c.hasClass("lister-item"))
+            .map(c -> {
+                final Element content = c.getElementsByClass("lister-item-content").first();
+                final Element aLink = content.getElementsByClass("lister-item-header").first().getElementsByTag("a").first();
+                final String titleName = aLink.text();
+                final String titleId = aLink.attr("href").split("/")[2].substring(2);
+                final String characterName = "blank-for-now";
 
-        mainDiv.children().stream().filter(title -> title.nodeName().equals("div") && title.classNames().contains("filmo-row")).forEach(title -> {
-            title.getElementsByClass("year_column").forEach(Node::remove);
-
-            Element bTag = title.getElementsByTag("b").get(0);
-            Element titleTag = bTag.getElementsByTag("a").get(0);
-            String titleName = titleTag.text().trim();
-            String titleId = titleTag.attr("href").split("/")[2].substring(2);
-
-            bTag.remove();
-
-            for (Element child: title.children()) {
-                if (child.hasText()) {
-                    child.text("");
+                final Element firstRatings = content.getElementsByClass("ratings-imdb-rating").first();
+                if (firstRatings == null) { // i.e. if not-yet-released
+                    return Optional.<Pair<Title, Pair<String, Integer>>>empty();
                 }
-                if (child.nodeName().equals("br")) {
-                    child.remove();
-                    break;
-                }
-            }
-
-            title.getElementsByClass("filmo-episodes").forEach(Node::remove);
-
-            String charname = title.text().trim().replace("\n", "").replaceAll("\\(.*?\\)", "");
-            titlesWithCharNames.add(ImmutablePair.of(new Title(titleId, titleName), charname));
-        });
-
-        return titlesWithCharNames;
+                final String dataValueAttr = firstRatings.attr("data-value");
+                final Integer rating = Integer.valueOf(dataValueAttr.replace(".",""));
+                return Optional.of(Pair.of(new Title(titleId, titleName), Pair.of(characterName, rating)));
+            }).filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toList());
     }
+
 }

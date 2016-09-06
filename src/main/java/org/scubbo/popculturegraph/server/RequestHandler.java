@@ -33,26 +33,6 @@ public class RequestHandler extends AbstractHandler {
     private static final Actor actor = new Actor("0277213", "Nathan Fillion");
     private static final Title title = new Title("0379786", "Serenity");
 
-    public RequestHandler() {
-
-        try {
-            System.out.println("Building request handler");
-
-            System.out.println("Initializing from Actor Node");
-            adapter.initializeWithActorNode(actor.getId(), actor.getName());
-            System.out.println("Spreading from actor node");
-            adapter.spreadFromActorNode(actor);
-
-            System.out.println("Initializing from Title Node");
-            adapter.initializeWithTitleNode(title.getId(), title.getName());
-            System.out.println("Spreading from title node");
-            adapter.spreadFromTitleNode(title);
-
-            System.out.println("Initial spread complete");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void handle(String target,
                        Request baseRequest,
@@ -125,9 +105,9 @@ public class RequestHandler extends AbstractHandler {
             String name = request.getParameter("name");
             // DEBUG
             System.out.println("Received a request for sociable neighbours of title " + name);
-            List<Pair<Actor, String>> sociableNeighboursOfTitle;
+            List<Pair<Actor, String>> popularNeighboursOfTitle;
             try {
-                sociableNeighboursOfTitle = adapter.getSociableNeighboursOfTitle(new Title(titleId, name), 1);
+                popularNeighboursOfTitle = adapter.getPopularNeighboursOfTitle(new Title(titleId, name), 1);
 
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -136,7 +116,7 @@ public class RequestHandler extends AbstractHandler {
                 JSONArray nodes = new JSONArray();
                 JSONArray edges = new JSONArray();
 
-                for (Pair<Actor, String> actorAndCharacterName: sociableNeighboursOfTitle) {
+                for (Pair<Actor, String> actorAndCharacterName: popularNeighboursOfTitle) {
                     Actor actor = actorAndCharacterName.getLeft();
 
                     JSONObject node = new JSONObject();
@@ -153,8 +133,6 @@ public class RequestHandler extends AbstractHandler {
                     edge.put("name", actorAndCharacterName.getRight());
                     edges.put(edge);
 
-                    //TODO: background-thread this!
-                    adapter.spreadFromActorNode(actor);
                 }
 
                 JSONObject data = new JSONObject();
@@ -172,9 +150,9 @@ public class RequestHandler extends AbstractHandler {
         if (splitTarget.length > 2 && splitTarget[2].equals("actor")) {
             String actorId = request.getParameter("id");
             String name = request.getParameter("name");
-            List<Pair<Title, String>> sociableNeighboursOfActor;
+            List<Pair<Title, String>> popularNeighboursOfActor;
             try {
-                sociableNeighboursOfActor = adapter.getSociableNeighboursOfActor(new Actor(actorId, name), 1);
+                popularNeighboursOfActor = adapter.getPopularNeighboursOfActor(new Actor(actorId, name), 1);
 
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -183,7 +161,7 @@ public class RequestHandler extends AbstractHandler {
                 JSONArray nodes = new JSONArray();
                 JSONArray edges = new JSONArray();
 
-                for (Pair<Title, String> titleAndCharacterName: sociableNeighboursOfActor) {
+                for (Pair<Title, String> titleAndCharacterName: popularNeighboursOfActor) {
                     Title title = titleAndCharacterName.getLeft();
 
                     JSONObject node = new JSONObject();
@@ -200,8 +178,6 @@ public class RequestHandler extends AbstractHandler {
                     edge.put("name", titleAndCharacterName.getRight());
                     edges.put(edge);
 
-                    //TODO - background-thread this!
-                    adapter.spreadFromTitleNode(title);
                 }
 
                 JSONObject data = new JSONObject();

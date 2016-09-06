@@ -1,14 +1,13 @@
-Definitions:
+Here's what you need to do:
+* Returning just the first N actors from a title is fine because they're already sorted by importance (actually by appearances, I think?)
+* Alternative source for titles-for-actor is http://www.imdb.com/filmosearch?explore=title_type&role=nm0277213&ref_=filmo_vw_adv&sort=user_rating,desc&mode=advanced&page=1&title_type=tvSeries, but doesn't list character names - should be able to backfetch that, though?
+ * Needs to search both Movies *and* TV (separate pages)
+ * Limited to 50 results per page :(
+* Still need to allow multi-clicking for "next 3", and to suppress based on already-existing nodes
+* Longer-term, it would be nice if edges got drawn for any already existing nodes (i.e. if A1 and A2 were in T1 and T2, and current graph state is T1-A1-T2, spreading from T2 should a) create T2-A2 and b) create A2-T1)
 
-Title       - Movie or TV Show.
-Actor       - Person, male or female, who acts in a Title. I'm all for equality, but
-              Naming Things is srs bizness.
-Populated   - All neighbours of the node have been added to the graph
-Spread      - All neighbours of all neighbours of the node have been added to the graph
-              (i.e. all neighbours of the node are populated)
-Sociability - The number of films an actor has been in, or the number of actors in a film.
-              so, yeah, the degree. Screw you, mathematicians, I can make up my own words!
 
+IGNORE THE BELOW - it's still mostly true but in the process of being refactored
 
 Here's what happens when you click a (title) node:
 

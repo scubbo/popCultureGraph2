@@ -89,19 +89,19 @@ public class GraphAdapterTest {
 
         adapter.spreadFromActorNode(actor);
 
-        List<Pair<Title,String>> sociableNeighboursOfActor = adapter.getSociableNeighboursOfActor(actor, 1);
+        List<Pair<Title,String>> sociableNeighboursOfActor = adapter.getPopularNeighboursOfActor(actor, 1);
         assertThat(sociableNeighboursOfActor).hasSize(1);
         assertThat(sociableNeighboursOfActor.get(0).getLeft().getId()).isEqualTo("t-id-1");
 
-        sociableNeighboursOfActor = adapter.getSociableNeighboursOfActor(actor, 2);
+        sociableNeighboursOfActor = adapter.getPopularNeighboursOfActor(actor, 2);
         assertThat(sociableNeighboursOfActor).hasSize(1);
         assertThat(sociableNeighboursOfActor.get(0).getLeft().getId()).isEqualTo("t-id-2");
 
-        sociableNeighboursOfActor = adapter.getSociableNeighboursOfActor(actor, 3);
+        sociableNeighboursOfActor = adapter.getPopularNeighboursOfActor(actor, 3);
         assertThat(sociableNeighboursOfActor).hasSize(1);
         assertThat(sociableNeighboursOfActor.get(0).getLeft().getId()).isEqualTo("t-id-3");
 
-        sociableNeighboursOfActor = adapter.getSociableNeighboursOfActor(actor, 4);
+        sociableNeighboursOfActor = adapter.getPopularNeighboursOfActor(actor, 4);
         assertThat(sociableNeighboursOfActor).hasSize(0);
     }
 
@@ -134,19 +134,19 @@ public class GraphAdapterTest {
 
         adapter.spreadFromTitleNode(title);
 
-        List<Pair<Actor, String>> sociableNeighboursOfTitle = adapter.getSociableNeighboursOfTitle(title, 1);
+        List<Pair<Actor, String>> sociableNeighboursOfTitle = adapter.getPopularNeighboursOfTitle(title, 1);
         assertThat(sociableNeighboursOfTitle).hasSize(1);
         assertThat(sociableNeighboursOfTitle.get(0).getLeft().getId()).isEqualTo("a-id-1");
 
-        sociableNeighboursOfTitle = adapter.getSociableNeighboursOfTitle(title, 2);
+        sociableNeighboursOfTitle = adapter.getPopularNeighboursOfTitle(title, 2);
         assertThat(sociableNeighboursOfTitle).hasSize(1);
         assertThat(sociableNeighboursOfTitle.get(0).getLeft().getId()).isEqualTo("a-id-2");
 
-        sociableNeighboursOfTitle = adapter.getSociableNeighboursOfTitle(title, 3);
+        sociableNeighboursOfTitle = adapter.getPopularNeighboursOfTitle(title, 3);
         assertThat(sociableNeighboursOfTitle).hasSize(1);
         assertThat(sociableNeighboursOfTitle.get(0).getLeft().getId()).isEqualTo("a-id-3");
 
-        sociableNeighboursOfTitle = adapter.getSociableNeighboursOfTitle(title, 4);
+        sociableNeighboursOfTitle = adapter.getPopularNeighboursOfTitle(title, 4);
         assertThat(sociableNeighboursOfTitle).hasSize(0);
     }
 
@@ -156,14 +156,14 @@ public class GraphAdapterTest {
         Title title = new Title("t-id-1", "t-name-1");
         when(mockDataFetcher.getActorsForTitle(title.getId())).thenReturn(Collections.emptyList());
         adapter.initializeWithTitleNode(title.getId(), title.getName());
-        adapter.getSociableNeighboursOfTitle(title, 1);
+        adapter.getPopularNeighboursOfTitle(title, 1);
     }
 
     @Test(expected = PopulationException.class)
     public void testThrowsPopulationExceptionIfQueriedForActorBeforeSpread() throws Exception {
         GraphAdapter adapter = new GraphAdapter(mockDataFetcher);
         Actor actor = new Actor("a-id-1", "a-name-1");
-        adapter.getSociableNeighboursOfActor(actor, 1);
+        adapter.getPopularNeighboursOfActor(actor, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -173,7 +173,7 @@ public class GraphAdapterTest {
         when(mockDataFetcher.getTitlesForActor(actor.getId())).thenReturn(Collections.emptyList());
         adapter.initializeWithActorNode(actor.getId(), actor.getName());
         adapter.spreadFromActorNode(actor);
-        adapter.getSociableNeighboursOfActor(actor, 0);
+        adapter.getPopularNeighboursOfActor(actor, 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -183,7 +183,7 @@ public class GraphAdapterTest {
         when(mockDataFetcher.getActorsForTitle(title.getId())).thenReturn(Collections.emptyList());
         adapter.initializeWithTitleNode(title.getId(), title.getName());
         adapter.spreadFromTitleNode(title);
-        adapter.getSociableNeighboursOfTitle(title, 0);
+        adapter.getPopularNeighboursOfTitle(title, 0);
     }
 
 
