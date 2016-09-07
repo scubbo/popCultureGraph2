@@ -202,21 +202,6 @@ window.MOUSE_MODE = 'drag';
       })
     });
 
-    $('#submitButton').click(function() {
-      $.get('api', {}, function(data) {
-        nodes = data['data']['nodes'];
-        edges = data['data']['edges']
-
-        $.each(nodes, function(i, e) {
-          window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[]});
-        })
-
-        $.each(edges, function(i, e) {
-          window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
-        })
-      })
-    });
-
     $('#modeButton').click(function() {
       if (window.MOUSE_MODE == 'drag') {
         $('#modeButton').val('Switch to drag mode');
@@ -266,20 +251,9 @@ window.MOUSE_MODE = 'drag';
       }
     })
 
-    $('.nodeName').keydown(nodeNameKeyDown);
-
   })
 
 })(this.jQuery)
-
-function nodeNameKeyDown(e) {
-  targetElem = e.target
-  if (65 <= e.which && e.which <= 90) {
-    currentLetter = e.shiftKey ? String.fromCharCode(e.which) : String.fromCharCode(e.which).toLowerCase();
-    currentVal = $(targetElem).val() + currentLetter;
-  }
-  //TODO: Use this for predictions
-}
 
 function temporarilyHighlightNode(targetId) {
   node = window.sys.getNode(targetId)
