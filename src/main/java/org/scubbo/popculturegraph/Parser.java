@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Sets;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -15,6 +18,41 @@ import org.scubbo.popculturegraph.model.Actor;
 import org.scubbo.popculturegraph.model.Title;
 
 public class Parser {
+
+    // Some titles are just boring - e.g. chat shows, etc.
+    // This removes them
+    private static final Set<String> SUPPRESSED_TITLE_IDS = Sets.newHashSet(
+            "1524593", // Kevin Pollak's Chat Show
+            "0421460", // The Soup
+            "4280606", // The Late Late Show with James Corden
+            "0437729", // The Late Late Show with Craig Ferguson
+            "3109382", // Nerd HQ
+            "2773976", // Speakeasy: With Paul F. Tompkins
+            "4335742", // Lip Sync Battle
+            "3037520", // Hollywood Game Night
+            "0379623", // Ellen: The Ellen DeGeneres Show
+            "0115147", // The Daily Show with Trevor Noah
+            "0169455", // Inside the Actors Studio
+            "4877562", // The Chris Gethard Show
+            "2691394", // Parks and Recreation: Dammit Jerry!
+            "4311010", // Parks and Recreation in Europe
+            "2138881", // Parks and Recreation: Road Trip
+            "3530232", // Last Week Tonight with John Oliver
+            "1245769", // The Jace Hall Show
+            "3327536", // UCB Comedy Originals
+            "0106052", // Late Night with Conan O'Brien
+            "1231460", // Late Night with Jimmy Fallon
+            "3513388", // Late Night with Seth Meyers
+            "0083441", // Late Night with David Letterman
+            "0072562", // SNL
+            "0376434", // Tinseltown TV
+            "1392211", // A Powerful Noise Live
+            "1637574", // Conan
+            "2326995", // The Peter Austin Noto Show
+            "1535002", // Between Two Ferns with Zach Galifianakis
+            "3025364", // Carson on TCM
+            "0458254" // The Colbert Report
+    );
 
     public Collection<Pair<Actor, String>> parseDocForActors(final Document doc) {
         Collection<Pair<Actor, String>> actorsWithCharNames = new ArrayList<>();
@@ -87,6 +125,9 @@ public class Parser {
                 final Element aLink = content.getElementsByClass("lister-item-header").first().getElementsByTag("a").first();
                 final String titleName = aLink.text();
                 final String titleId = aLink.attr("href").split("/")[2].substring(2);
+                if (SUPPRESSED_TITLE_IDS.contains(titleId)) {
+                    return Optional.<Pair<Title, Pair<String, Integer>>>empty();
+                }
                 final String characterName = "blank-for-now";
 
                 final Element firstRatings = content.getElementsByClass("ratings-imdb-rating").first();
