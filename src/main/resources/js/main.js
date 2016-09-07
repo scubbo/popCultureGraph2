@@ -223,7 +223,22 @@ window.MOUSE_MODE = 'drag';
               url = '/api/actor';
             }
 
-            $.post(url, {'id':subs[1],'name':name,'clickth':clickth}, function(data) {
+            neighbours = [];
+            $.each(
+                window.sys.getEdgesFrom(clicked.node),
+                function(i, e) {
+                    console.log("from");
+                    console.log(e);
+                    neighbours.push(e.target.name);
+                });
+            $.each(
+                window.sys.getEdgesTo(clicked.node),
+                function(i, e) {
+                    console.log("to");
+                    console.log(e);
+                    neighbours.push(e.source.name);
+                });
+            $.post(url, {'id':subs[1],'name':name,'clickth':clickth,'neighbours':neighbours}, function(data) {
               nodes = data['data']['nodes'];
               edges = data['data']['edges'];
 

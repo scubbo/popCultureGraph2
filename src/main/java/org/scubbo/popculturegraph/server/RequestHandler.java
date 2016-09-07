@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -100,9 +102,14 @@ public class RequestHandler extends AbstractHandler {
             String titleId = request.getParameter("id");
             String name = request.getParameter("name");
             Integer clickth = Integer.valueOf(request.getParameter("clickth"));
+            List<String> neighbours =
+                    Arrays.stream(request.getParameterValues("neighbours[]"))
+                    .map(s -> s.substring(s.indexOf("_") + 1))
+                    .collect(Collectors.toList());
             List<Pair<Actor, String>> popularNeighboursOfTitle;
             try {
-                popularNeighboursOfTitle = adapter.getPopularNeighboursOfTitle(new Title(titleId, name), clickth);
+                popularNeighboursOfTitle =
+                        adapter.getPopularNeighboursOfTitle(new Title(titleId, name), clickth, neighbours);
 
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -146,9 +153,14 @@ public class RequestHandler extends AbstractHandler {
             String actorId = request.getParameter("id");
             String name = request.getParameter("name");
             Integer clickth = Integer.valueOf(request.getParameter("clickth"));
+            List<String> neighbours =
+                    Arrays.stream(request.getParameterValues("neighbours[]"))
+                            .map(s -> s.substring(s.indexOf("_") + 1))
+                            .collect(Collectors.toList());
             List<Pair<Title, String>> popularNeighboursOfActor;
             try {
-                popularNeighboursOfActor = adapter.getPopularNeighboursOfActor(new Actor(actorId, name), clickth);
+                popularNeighboursOfActor =
+                        adapter.getPopularNeighboursOfActor(new Actor(actorId, name), clickth, neighbours);
 
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_OK);
