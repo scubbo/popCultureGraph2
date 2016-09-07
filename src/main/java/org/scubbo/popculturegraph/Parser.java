@@ -142,4 +142,28 @@ public class Parser {
             .collect(Collectors.toList());
     }
 
+    // TODO this logic is exactly the same as the Title search, only different because of
+    // type signature (and because Entity is abstract).
+    public Actor parseSearchForActorDoc(final Document doc) {
+        final Element link = doc.getElementsByClass("findList").first()
+                                .getElementsByTag("tbody").first()
+                                .getElementsByTag("tr").first()
+                                .getElementsByClass("result_text").first()
+                                .getElementsByTag("a").first();
+        final String name = link.text();
+        final String id = link.attr("href").split("/")[2].substring(2);
+        return new Actor(id, name);
+    }
+
+    public Title parseSearchForTitleDoc(final Document doc) {
+        final Element link = doc.getElementsByClass("findList").first()
+                .getElementsByTag("tbody").first()
+                .getElementsByTag("tr").first()
+                .getElementsByClass("result_text").first()
+                .getElementsByTag("a").first();
+        final String name = link.text();
+        final String id = link.attr("href").split("/")[2].substring(2);
+        return new Title(id, name);
+    }
+
 }

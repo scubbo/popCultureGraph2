@@ -189,18 +189,23 @@ window.MOUSE_MODE = 'drag';
     sys.parameters({gravity:true}) // use center-gravity to make the graph settle nicely (ymmv)
     sys.renderer = Renderer("#viewport") // our newly created renderer will have its .init() method called shortly by sys...
 
-    $.get('api/hardcoded', {}, function(data) {
-      nodes = data['data']['nodes'];
-      edges = data['data']['edges']
+    $('#enter').click(function() {
+      $('#instructionsSpan').fadeIn();
+      $('#enter').fadeOut();
+      $.get('api/startup', {type:$('#inputType').val(), val:$('#nameInput').val()}, function(data) {
+        console.log(data);
+        nodes = data['data']['nodes'];
+        edges = data['data']['edges'];
 
-      $.each(nodes, function(i, e) {
-        window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[],clickth:0});
-      })
+        $.each(nodes, function(i, e) {
+          window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[],clickth:0});
+        })
 
-      $.each(edges, function(i, e) {
-        window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
+        $.each(edges, function(i, e) {
+          window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
+        })
       })
-    });
+    })
 
     $('#modeButton').click(function() {
       if (window.MOUSE_MODE == 'drag') {
@@ -227,17 +232,15 @@ window.MOUSE_MODE = 'drag';
             $.each(
                 window.sys.getEdgesFrom(clicked.node),
                 function(i, e) {
-                    console.log("from");
-                    console.log(e);
                     neighbours.push(e.target.name);
                 });
             $.each(
                 window.sys.getEdgesTo(clicked.node),
                 function(i, e) {
-                    console.log("to");
-                    console.log(e);
                     neighbours.push(e.source.name);
                 });
+
+            // TODO - extract this common logic from here and the initial setup step
             $.post(url, {'id':subs[1],'name':name,'clickth':clickth,'neighbours':neighbours}, function(data) {
               nodes = data['data']['nodes'];
               edges = data['data']['edges'];
@@ -252,7 +255,6 @@ window.MOUSE_MODE = 'drag';
               clicked.node.data['clickth']++;
             });
 
-            console.log(clicked.node.name);
           }});
         $('canvas').bind('mousemove', function(){});
         window.MOUSE_MODE = 'spread';

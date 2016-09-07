@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.scubbo.popculturegraph.exception.PopulationException;
 import org.scubbo.popculturegraph.model.Actor;
 import org.scubbo.popculturegraph.model.Title;
 
@@ -22,7 +21,7 @@ public class GraphAdapter {
                 Actor actor,
                 Integer popularityLevel,
                 List<String> neighbours)
-            throws PopulationException, IOException {
+            throws IOException {
         if (popularityLevel < 0) {
             throw new IllegalArgumentException();
         }
@@ -42,7 +41,7 @@ public class GraphAdapter {
                 Title title,
                 Integer popularityLevel,
                 List<String> neighbours)
-            throws PopulationException, IOException {
+            throws IOException {
         if (popularityLevel < 0) {
             throw new IllegalArgumentException();
         }

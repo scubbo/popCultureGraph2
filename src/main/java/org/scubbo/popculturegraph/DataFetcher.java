@@ -20,6 +20,8 @@ public class DataFetcher {
     private static final String MOVIE_TITLES_FOR_ACTOR_STRING = "http://www.imdb.com/filmosearch?explore=title_type&role=nm%s&ref_=filmo_ref_typ&sort=user_rating,desc&mode=advanced&page=1&title_type=movie";
     private static final String ACTORS_FOR_TITLE_PREFIX = "http://www.imdb.com/title/tt";
     private static final String ACTORS_FOR_TITLE_SUFFIX = "/fullcredits";
+    public static final String SEARCH_FOR_ACTOR_URL = "http://www.imdb.com/find?q=%s&s=nm&ref_=fn_nm";
+    private static final String SEARCH_FOR_TITLE_URL = "http://www.imdb.com/find?q=%s&s=tt&ref_=fn_tt";
 
     private final DatabaseConnector databaseConnector;
     private final JSoupWrapper jSoupWrapper;
@@ -119,5 +121,15 @@ public class DataFetcher {
 
         return outputList;
 
+    }
+
+    public Actor searchForActor(final String name) throws IOException {
+        Document searchForActorDoc = jSoupWrapper.getDoc(String.format(SEARCH_FOR_ACTOR_URL, name.replace(" ", "%20")));
+        return parser.parseSearchForActorDoc(searchForActorDoc);
+    }
+
+    public Title searchForTitle(final String name) throws IOException {
+        Document searchForTitleDoc = jSoupWrapper.getDoc(String.format(SEARCH_FOR_TITLE_URL, name.replace(" ", "%20")));
+        return parser.parseSearchForTitleDoc(searchForTitleDoc);
     }
 }
