@@ -266,6 +266,11 @@ window.MOUSE_MODE = 'drag';
       }
     })
 
+    //TODO: Put some delay here, or make it click-activated
+    $('#initialDisplayDiv').fadeOut(2000, function() {
+      $('#fadeInDisplayDiv').fadeIn();
+    });
+
   })
 
 })(this.jQuery)
