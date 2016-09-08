@@ -198,7 +198,7 @@ window.MOUSE_MODE = 'drag';
         edges = data['data']['edges'];
 
         $.each(nodes, function(i, e) {
-          window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[],clickth:0});
+          window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[]});
         })
 
         $.each(edges, function(i, e) {
@@ -221,7 +221,6 @@ window.MOUSE_MODE = 'drag';
           if (clicked && clicked.node !== null){
             subs = clicked.node.name.split('_');
             name = clicked.node.data['name'];
-            clickth = clicked.node.data['clickth'];
             if (subs[0] == 'title') {
               url = '/api/title';
             } else {
@@ -241,18 +240,17 @@ window.MOUSE_MODE = 'drag';
                 });
 
             // TODO - extract this common logic from here and the initial setup step
-            $.post(url, {'id':subs[1],'name':name,'clickth':clickth,'neighbours':neighbours}, function(data) {
+            $.post(url, {'id':subs[1],'name':name,'neighbours':neighbours}, function(data) {
               nodes = data['data']['nodes'];
               edges = data['data']['edges'];
 
               $.each(nodes, function(i, e) {
-                window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[],clickth:0});
+                window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[]});
               })
 
               $.each(edges, function(i, e) {
                 window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
               })
-              clicked.node.data['clickth']++;
             });
 
           }});

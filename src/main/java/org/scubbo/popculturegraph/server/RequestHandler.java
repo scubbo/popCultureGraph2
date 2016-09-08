@@ -98,13 +98,12 @@ public class RequestHandler extends AbstractHandler {
         if (splitTarget.length > 2 && splitTarget[2].equals("title")) {
             String titleId = request.getParameter("id");
             String name = request.getParameter("name");
-            Integer clickth = Integer.valueOf(request.getParameter("clickth"));
             List<String> neighbours =
                     Arrays.stream(request.getParameterValues("neighbours[]"))
                     .map(s -> s.substring(s.indexOf("_") + 1))
                     .collect(Collectors.toList());
             List<Pair<Actor, String>> popularNeighboursOfTitle =
-                    adapter.getPopularNeighboursOfTitle(new Title(titleId, name), clickth, neighbours);
+                    adapter.getPopularNeighboursOfTitle(new Title(titleId, name), neighbours);
 
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -144,13 +143,12 @@ public class RequestHandler extends AbstractHandler {
         if (splitTarget.length > 2 && splitTarget[2].equals("actor")) {
             String actorId = request.getParameter("id");
             String name = request.getParameter("name");
-            Integer clickth = Integer.valueOf(request.getParameter("clickth"));
             List<String> neighbours =
                     Arrays.stream(request.getParameterValues("neighbours[]"))
                             .map(s -> s.substring(s.indexOf("_") + 1))
                             .collect(Collectors.toList());
             List<Pair<Title, String>> popularNeighboursOfActor =
-                    adapter.getPopularNeighboursOfActor(new Actor(actorId, name), clickth, neighbours);
+                    adapter.getPopularNeighboursOfActor(new Actor(actorId, name), neighbours);
 
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -199,7 +197,7 @@ public class RequestHandler extends AbstractHandler {
             if (request.getParameter("type").equals("actor")) {
 
                 Actor actor = dataFetcher.searchForActor(request.getParameter("val"));
-                List<Pair<Title, String>> popularNeighboursOfActor = adapter.getPopularNeighboursOfActor(actor, 0, Collections.emptyList());
+                List<Pair<Title, String>> popularNeighboursOfActor = adapter.getPopularNeighboursOfActor(actor, Collections.emptyList());
 
                 JSONObject node = new JSONObject();
                 node.put("id", "actor_" + actor.getId());
@@ -226,7 +224,7 @@ public class RequestHandler extends AbstractHandler {
             } else {
 
                 Title title = dataFetcher.searchForTitle(request.getParameter("val"));
-                List<Pair<Actor, String>> popularNeighboursOfTitle = adapter.getPopularNeighboursOfTitle(title, 0, Collections.emptyList());
+                List<Pair<Actor, String>> popularNeighboursOfTitle = adapter.getPopularNeighboursOfTitle(title, Collections.emptyList());
 
                 JSONObject node = new JSONObject();
                 node.put("id", "title_" + title.getId());
