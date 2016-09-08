@@ -68,8 +68,8 @@ window.MOUSE_MODE = 'drag';
           ctx.moveTo(pt1.x, pt1.y)
           ctx.lineTo(pt2.x, pt2.y)
           ctx.stroke()
-          if (edge.data.showName) {
-            //Write the name of the edge
+          if (!!edge.data.name) {
+            // commenting so this is easy to find - edgename
             ctx.fillStyle = "gray"
             ctx.fillRect((pt1.x+pt2.x)/2-3, (pt1.y+pt2.y)/2-9, ctx.measureText(edge.data.name).width+6, 12)
             ctx.fillStyle = "white"
@@ -190,10 +190,12 @@ window.MOUSE_MODE = 'drag';
     sys.renderer = Renderer("#viewport") // our newly created renderer will have its .init() method called shortly by sys...
 
     $('#enter').click(function() {
-      $('#instructionsSpan').fadeIn();
-      $('#enter').fadeOut();
+      $('#waitForIt').show();
       $.get('api/startup', {type:$('#inputType').val(), val:$('#nameInput').val()}, function(data) {
-        console.log(data);
+        $('#initialInputDiv').fadeOut(function() {
+          $('#instructionsSpan').fadeIn();
+        });
+
         nodes = data['data']['nodes'];
         edges = data['data']['edges'];
 
@@ -266,10 +268,7 @@ window.MOUSE_MODE = 'drag';
       }
     })
 
-    //TODO: Put some delay here, or make it click-activated
-    $('#initialDisplayDiv').fadeOut(2000, function() {
-      $('#fadeInDisplayDiv').fadeIn();
-    });
+    $('#fadeInDisplayDiv').fadeIn(1000);
 
   })
 

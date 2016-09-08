@@ -40,6 +40,8 @@ public class Parser {
             "3530232", // Last Week Tonight with John Oliver
             "1245769", // The Jace Hall Show
             "3327536", // UCB Comedy Originals
+            "1637574", // Conan
+            "0899126", // The Tonight Show with Conan O'Brien
             "0106052", // Late Night with Conan O'Brien
             "1231460", // Late Night with Jimmy Fallon
             "3513388", // Late Night with Seth Meyers
@@ -47,11 +49,11 @@ public class Parser {
             "0072562", // SNL
             "0376434", // Tinseltown TV
             "1392211", // A Powerful Noise Live
-            "1637574", // Conan
             "2326995", // The Peter Austin Noto Show
             "1535002", // Between Two Ferns with Zach Galifianakis
             "3025364", // Carson on TCM
-            "0458254" // The Colbert Report
+            "0458254", // The Colbert Report
+            "0924651" // The Graham Norton Show
     );
 
     public Collection<Pair<Actor, String>> parseDocForActors(final Document doc) {
@@ -128,7 +130,7 @@ public class Parser {
                 if (SUPPRESSED_TITLE_IDS.contains(titleId)) {
                     return Optional.<Pair<Title, Pair<String, Integer>>>empty();
                 }
-                final String characterName = "blank-for-now";
+                final String characterName = ""; // TODO: get name for characters from the titleForActors data
 
                 final Element firstRatings = content.getElementsByClass("ratings-imdb-rating").first();
                 if (firstRatings == null) { // i.e. if not-yet-released
