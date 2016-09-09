@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jsoup.nodes.Document;
@@ -71,6 +72,15 @@ public class DataFetcher {
 
     private List<Pair<Title, String>> buildMergedList(final List<Pair<Title, Pair<String, Integer>>> list1,
                                                       final List<Pair<Title, Pair<String, Integer>>> list2) {
+
+        if (list1.isEmpty()) {
+            return list2.stream().map(p -> Pair.of(p.getLeft(), p.getRight().getLeft())).collect(Collectors.toList());
+        }
+
+        if (list2.isEmpty()) {
+            return list1.stream().map(p -> Pair.of(p.getLeft(), p.getRight().getLeft())).collect(Collectors.toList());
+        }
+
         final Iterator<Pair<Title, Pair<String, Integer>>> iter1 = list1.iterator();
         final Iterator<Pair<Title, Pair<String, Integer>>> iter2 = list2.iterator();
 
