@@ -34,6 +34,7 @@ public class Parser {
             "0115147", // The Daily Show with Trevor Noah
             "0169455", // Inside the Actors Studio
             "4877562", // The Chris Gethard Show
+            "3564228", // The Chris Gethard Show: Public Access
             "2691394", // Parks and Recreation: Dammit Jerry!
             "4311010", // Parks and Recreation in Europe
             "2138881", // Parks and Recreation: Road Trip
@@ -53,7 +54,8 @@ public class Parser {
             "1535002", // Between Two Ferns with Zach Galifianakis
             "3025364", // Carson on TCM
             "0458254", // The Colbert Report
-            "0924651" // The Graham Norton Show
+            "0924651", // The Graham Norton Show
+            "3473134" // Off Camera with Sam Jones
     );
 
     public Collection<Pair<Actor, String>> parseDocForActors(final Document doc) {
