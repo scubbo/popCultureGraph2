@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -141,5 +142,38 @@ public class DataFetcher {
     public Title searchForTitle(final String name) throws IOException {
         Document searchForTitleDoc = jSoupWrapper.getDoc(String.format(SEARCH_FOR_TITLE_URL, name.replace(" ", "%20")));
         return parser.parseSearchForTitleDoc(searchForTitleDoc);
+    }
+
+    public String fetchAndUpdateCharacterNameForTitleAndActor(final String titleId, final String actorId) {
+        // Get titles for actor is often missing the character name,
+        // because of IMDb page limitations, so we have to look it up
+        // from getActorsForTitle
+        Collection<Pair<Actor, String>> actorsForTitle;
+        try {
+            actorsForTitle = getActorsForTitle(titleId);
+        } catch (IOException e) {
+            return "";
+        }
+
+        String characterName;
+        try {
+            characterName = actorsForTitle.stream().filter((p) -> p.getLeft().getId().equals(actorId)).findFirst().get().getRight();
+        } catch (NoSuchElementException e) {
+            return "";
+        }
+
+        // We've got the character-name, now let's update the database so it'll be fast next time
+        final Collection<Pair<Title, String>> titlesForActor;
+        try {
+            titlesForActor = getTitlesForActor(actorId);
+            databaseConnector.setTitlesForActor(
+                titlesForActor.stream()
+                .map((p) -> p.getLeft().getId().equals(titleId) ? Pair.of(p.getLeft(), characterName): p)
+                .collect(Collectors.toList()), actorId);
+        } catch (IOException e) {
+            // Do nothing - just return characterName;
+        }
+        return characterName;
+
     }
 }

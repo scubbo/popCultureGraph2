@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.scubbo.popculturegraph.model.Actor;
 import org.scubbo.popculturegraph.model.Title;
@@ -26,9 +27,15 @@ public class GraphAdapter {
 
         return data.stream()
                 .filter((t) -> !neighbours.contains(t.getLeft().getId()))
-                // also pass back Character Name
                 .limit(3)
-                .map((t) -> Pair.of(t.getLeft(), t.getRight()))
+                .map((t) ->
+                    StringUtils.isBlank(t.getRight()) ? // If character name is blank...
+                        Pair.of(                        // ...build a new pair from...
+                            t.getLeft(),                // ...the existing title, and
+                            dataFetcher.fetchAndUpdateCharacterNameForTitleAndActor(
+                                t.getLeft().getId(),    // ...a re-fetched character name:
+                                actor.getId())) :
+                        t)                              // otherwise, just pass back
                 .collect(Collectors.toList());
     }
 
@@ -39,11 +46,10 @@ public class GraphAdapter {
 
         final Collection<Pair<Actor, String>> data = dataFetcher.getActorsForTitle(title.getId());
 
+
         return data.stream()
                 .filter((a) -> !neighbours.contains(a.getLeft().getId()))
-                // also pass back Character Name
                 .limit(3)
-                .map((a) -> Pair.of(a.getLeft(), a.getRight()))
                 .collect(Collectors.toList());
     }
 
