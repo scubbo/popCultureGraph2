@@ -209,9 +209,14 @@ window.MOUSE_MODE = 'drag';
       })
     })
 
-    $('#modeButton').click(function() {
-      if (window.MOUSE_MODE == 'drag') {
-        $('#modeButton').val('Switch to drag mode');
+    $('#mode').change(function() {
+      mode = $('#mode').val();
+      if (mode == 'drag') {
+        $('canvas').unbind('mousedown');
+        $('canvas').unbind('mousemove');
+        $('canvas').mousedown(window.originalHandler.clicked);
+        $('canvas').bind('mousemove', window.originalHandler.moved);
+      } else {
         $('canvas').unbind('mousedown');
         $('canvas').unbind('mousemove');
         $('canvas').mousedown(function(e){
@@ -257,16 +262,8 @@ window.MOUSE_MODE = 'drag';
 
           }});
         $('canvas').bind('mousemove', function(){});
-        window.MOUSE_MODE = 'spread';
-      } else {
-        $('#modeButton').val('Switch to spread mode');
-        $('canvas').unbind('mousedown');
-        $('canvas').unbind('mousemove');
-        $('canvas').mousedown(window.originalHandler.clicked);
-        $('canvas').bind('mousemove', window.originalHandler.moved);
-        window.MOUSE_MODE = 'drag';
       }
-    })
+    });
 
     $('#fadeInDisplayDiv').fadeIn(1000);
 
