@@ -193,7 +193,7 @@ window.MOUSE_MODE = 'drag';
       $('#waitForIt').show();
       $.get('api/startup', {type:$('#inputType').val(), val:$('#nameInput').val()}, function(data) {
         $('#initialInputDiv').fadeOut(function() {
-          $('#instructionsSpan').fadeIn();
+          $('#playDiv').fadeIn();
         });
 
         nodes = data['data']['nodes'];

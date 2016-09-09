@@ -3,7 +3,26 @@ body {
   padding: 0px;
 }
 
-#fadeInDisplayDiv {
+#initialInputDiv {
+  background-color: #00f;
+  height: 100%;
+  width: 100%;
+}
+
+#initialInputDiv span {
+  color: #fff;
+  font-weight: bold;
+}
+
+#innerInputDiv {
+  position: fixed;
+  width: 500px;
+  top: 50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+}
+
+#playDiv {
   display: none;
 }
 

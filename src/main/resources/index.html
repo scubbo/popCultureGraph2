@@ -12,20 +12,22 @@
 
 <body>
 
-<div id="fadeInDisplayDiv">
-  <div id="initialInputDiv">
-      <span>Enter the name of an Actor/Actress, TV show, or Movie</span>
-      <input id="nameInput" type="text" placeholder="Name" />
-      <select id="inputType">
-          <option value="actor">Actor/Actress</option>
-          <option value="title">TV Show/Movie</option>
-      </select>
-      <input id="enter" type="button" value="Go" />
-      <span id="waitForIt">Wait for it...</span>
-      <br/>
+<div id="initialInputDiv">
+  <div id="innerInputDiv">
+    <span>Enter the name of an Actor/Actress, TV show, or Movie</span>
+    <br/>
+    <input id="nameInput" type="text" placeholder="Name" />
+    <select id="inputType">
+        <option value="actor">Actor/Actress</option>
+        <option value="title">TV Show/Movie</option>
+    </select>
+    <input id="enter" type="button" value="Go" />
+    <span id="waitForIt">Wait for it...</span>
   </div>
+</div>
+
+<div id="playDiv">
   <div id="leftDiv" style="float:left;">
-      <span id="instructionsSpan" style="display:none;">Now switch to 'spread mode' (below), and click a node!<br/>(The response might be a little slow if you've uncovered a new node)<br/>You can click a node more than once!</span>
       <input id="modeButton" type="button" value="Switch to spread mode"/>
   </div>
 
