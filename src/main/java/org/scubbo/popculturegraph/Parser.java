@@ -135,13 +135,19 @@ public class Parser {
         return mainDiv.children().stream().filter(c -> c.hasClass("lister-item"))
             .map(c -> {
                 final Element content = c.getElementsByClass("lister-item-content").first();
-                final Element aLink = content.getElementsByClass("lister-item-header").first().getElementsByTag("a").first();
+                final Element aLink;
+                try {
+                    aLink = content.getElementsByClass("lister-item-header").first().getElementsByTag("a").first();
+                } catch (Exception e) {
+                    System.out.println("Exception!!!!");
+                    return Optional.<Pair<Title, Pair<String, Integer>>>empty();
+                }
                 final String titleName = aLink.text();
                 final String titleId = aLink.attr("href").split("/")[2].substring(2);
                 if (SUPPRESSED_TITLE_IDS.contains(titleId)) {
                     return Optional.<Pair<Title, Pair<String, Integer>>>empty();
                 }
-                final String characterName = ""; // TODO: get name for characters from the titleForActors data
+                final String characterName = "";
 
                 final Element firstRatings = content.getElementsByClass("ratings-imdb-rating").first();
                 if (firstRatings == null) { // i.e. if not-yet-released
