@@ -204,8 +204,33 @@ window.MOUSE_MODE = 'drag';
         })
 
         $.each(edges, function(i, e) {
-          window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
-        })
+            window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
+            if (!e['name']) {
+              node1 = window.sys.getNode(e['nodes'][0])
+              node2 = window.sys.getNode(e['nodes'][1])
+              if (node1['name'].startsWith('actor')) {
+                actorId = node1['name'].replace('actor_','');
+                titleId = node2['name'].replace('title_','');
+              } else {
+                actorId = node2['name'].replace('actor_','');
+                titleId = node1['name'].replace('title_','');
+              }
+              $.post('/api/characterName', {'actorId':actorId,'titleId':titleId}, function(response) {
+                // Can't just persist a reference from addEdge, above, because the $.each(edges...) runs in parallel and would overwrite
+                responseActorId = response['actorId'];
+                responseTitleId = response['titleId'];
+                edgesFrom = window.sys.getEdgesFrom('title_' + responseTitleId);
+
+                for (i=0;i<edgesFrom.length;i++) {
+                  candidateEdge = edgesFrom[i];
+                  if (candidateEdge.target['name'] == 'actor_'+responseActorId) {
+                    candidateEdge['data']['name'] = response['characterName'];
+                  }
+                }
+
+              });
+            }
+          });
       })
     })
 
@@ -257,7 +282,32 @@ window.MOUSE_MODE = 'drag';
 
               $.each(edges, function(i, e) {
                 window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
-              })
+                if (!e['name']) {
+                  node1 = window.sys.getNode(e['nodes'][0])
+                  node2 = window.sys.getNode(e['nodes'][1])
+                  if (node1['name'].startsWith('actor')) {
+                    actorId = node1['name'].replace('actor_','');
+                    titleId = node2['name'].replace('title_','');
+                  } else {
+                    actorId = node2['name'].replace('actor_','');
+                    titleId = node1['name'].replace('title_','');
+                  }
+                  $.post('/api/characterName', {'actorId':actorId,'titleId':titleId}, function(response) {
+                    // Can't just persist a reference from addEdge, above, because the $.each(edges...) runs in parallel and would overwrite
+                    responseActorId = response['actorId'];
+                    responseTitleId = response['titleId'];
+                    edgesFrom = window.sys.getEdgesFrom('title_' + responseTitleId);
+
+                    for (i=0;i<edgesFrom.length;i++) {
+                      candidateEdge = edgesFrom[i];
+                      if (candidateEdge.target['name'] == 'actor_'+responseActorId) {
+                        candidateEdge['data']['name'] = response['characterName'];
+                      }
+                    }
+
+                  });
+                }
+              });
             });
 
           }});

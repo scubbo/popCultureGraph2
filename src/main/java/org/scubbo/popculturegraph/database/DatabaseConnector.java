@@ -123,7 +123,6 @@ public class DatabaseConnector {
                     }
                     return Pair.of(date, actors);
                 } else {
-                    System.out.println("Database had no contents for title id " + id + ", returning null");
                     return null;
                 }
 
@@ -235,7 +234,6 @@ public class DatabaseConnector {
                     }
                     return Pair.of(date, titles);
                 } else {
-                    System.out.println("Database had no contents for actors id " + id + ", returning null");
                     return null;
                 }
 
