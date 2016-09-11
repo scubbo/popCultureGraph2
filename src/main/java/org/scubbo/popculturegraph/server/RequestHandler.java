@@ -88,6 +88,10 @@ public class RequestHandler extends AbstractHandler {
             return "text/javascript";
         }
 
+        if (target.length()>1 && target.substring(target.length()-3).equals("css")) {
+            return "text/css";
+        }
+
         if (target.equals("/favicon.ico")) {
             return "image/x-icon";
         }
