@@ -52,13 +52,13 @@ public class RequestHandler extends AbstractHandler {
             baseRequest.setHandled(true);
 
             target = target.equals("/") ? "index.html" : target.substring(1);
-            if (target.equals("favicon.ico")) {
-                // TODO: Can't get this working.
-                return;
-            }
 
             StringBuilder sb = new StringBuilder();
             InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(target);
+            if (resourceAsStream == null) {
+                System.out.println("Got a request for " + target + " which cannot be fulfilled");
+                return;
+            }
             BufferedReader br = new BufferedReader(new InputStreamReader(resourceAsStream));
             String line;
             try {
