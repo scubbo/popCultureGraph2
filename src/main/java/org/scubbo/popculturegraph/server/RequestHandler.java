@@ -40,7 +40,7 @@ public class RequestHandler extends AbstractHandler {
             throws IOException, ServletException {
 
         try {
-            System.out.println("Receieved request: " + target + ":" + request);
+            System.out.println("Received request: " + target + ":" + request);
             String[] splitTarget = target.split("/");
             if (splitTarget.length > 0 && splitTarget[1].equals("api")) {
                 callApi(target, baseRequest, request, response);
@@ -52,6 +52,10 @@ public class RequestHandler extends AbstractHandler {
             baseRequest.setHandled(true);
 
             target = target.equals("/") ? "index.html" : target.substring(1);
+            if (target.equals("favicon.ico")) {
+                // TODO: Can't get this working.
+                return;
+            }
 
             StringBuilder sb = new StringBuilder();
             InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(target);
