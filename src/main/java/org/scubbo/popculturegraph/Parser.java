@@ -55,7 +55,16 @@ public class Parser {
             "3025364", // Carson on TCM
             "0458254", // The Colbert Report
             "0924651", // The Graham Norton Show
-            "3473134" // Off Camera with Sam Jones
+            "3473134", // Off Camera with Sam Jones
+            "1926875", // The Conversation
+            "1987585", // I Ain't Scared of You: A Tribute to Bernie Mac
+            "0486066", // The Daily Habit
+            "2043893", // Kingdom Come
+            "2113683", // I Know That Voice
+            "0397843", // WXW Rage TV
+            "0397843", // Filmnut
+            "1628033", // Top Gear
+            "1248967" // Top Gear USA
     );
 
     public Collection<Pair<Actor, String>> parseDocForActors(final Document doc) {
