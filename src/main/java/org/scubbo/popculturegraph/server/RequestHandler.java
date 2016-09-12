@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +42,7 @@ public class RequestHandler extends AbstractHandler {
             throws IOException, ServletException {
 
         try {
-            System.out.println("Received request: " + target + ":" + request);
+            System.out.println(Instant.now().atOffset(ZoneOffset.of("-08:00")).toString() + " - Received request: " + target + ":" + request);
             String[] splitTarget = target.split("/");
             if (splitTarget.length > 0 && splitTarget[1].equals("api")) {
                 callApi(target, baseRequest, request, response);
