@@ -29,3 +29,46 @@ body {
 #waitForIt {
   display: none;
 }
+
+#mode {
+  position: fixed;
+  top: 0%;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+#whatLink {
+  position: fixed;
+  top: 0%;
+  left: 0%;
+}
+
+#whoLink {
+  position: fixed;
+  top: 0%;
+  right: 0%;
+}
+
+#whatDiv {
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  z-index: 20;
+}
+
+#whoDiv {
+  position: absolute;
+  top: 0%;
+  right: 0%;
+  z-index:20;
+}
+
+.hiddenDiv {
+  display: none;
+  border: 1px solid #00f;
+  border-radius: 10px;
+  background-color: #00c;
+  width: 500px;
+  padding: 20px;
+  color: white;
+}

@@ -189,6 +189,18 @@ window.MOUSE_MODE = 'drag';
     sys.parameters({gravity:true}) // use center-gravity to make the graph settle nicely (ymmv)
     sys.renderer = Renderer("#viewport") // our newly created renderer will have its .init() method called shortly by sys...
 
+    $('#whatLink').click(function() {
+      $('#whatDiv').fadeIn();
+    });
+
+    $('#whoLink').click(function() {
+      $('#whoDiv').fadeIn();
+    });
+
+    $('.hiddenDiv').click(function() {
+      $(this).fadeOut();
+    });
+
     $('#enter').click(function() {
       $('#waitForIt').show();
       $.get('api/startup', {type:$('#inputType').val(), val:$('#nameInput').val()}, function(data) {

@@ -135,6 +135,9 @@ public class DataFetcher {
     }
 
     public Actor searchForActor(final String name) throws IOException {
+        if (name.equals("Seth Green")) { // Hard-coded for offline development
+            return new Actor("0001293", "Seth Green");
+        }
         Document searchForActorDoc = jSoupWrapper.getDoc(String.format(SEARCH_FOR_ACTOR_URL, name.replace(" ", "%20")));
         return parser.parseSearchForActorDoc(searchForActorDoc);
     }
