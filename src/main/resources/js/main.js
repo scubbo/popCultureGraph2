@@ -7,6 +7,8 @@ window.SELECTION_HIGHLIGHT_TIME = 2000;
 window.NOT_CONNECTED = 99999;
 window.MAXIMUM_DEGREE = 1;
 window.MOUSE_MODE = 'drag';
+window.HIDDEN_ACTORS = [];
+window.HIDDEN_TITLES = [];
 
 (function($){
 
@@ -247,84 +249,108 @@ window.MOUSE_MODE = 'drag';
     })
 
     $('#mode').change(function() {
-      mode = $('#mode').val();
-      if (mode == 'drag') {
-        $('canvas').unbind('mousedown');
-        $('canvas').unbind('mousemove');
-        $('canvas').mousedown(window.originalHandler.clicked);
-        $('canvas').bind('mousemove', window.originalHandler.moved);
-      } else {
-        $('canvas').unbind('mousedown');
-        $('canvas').unbind('mousemove');
-        $('canvas').mousedown(function(e){
-          var pos = $('canvas').offset();
-          _mouseP = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
-          clicked = window.particleSystem.nearest(_mouseP).distance < window.CLICK_DISTANCE ? particleSystem.nearest(_mouseP) : null
+      switch ($('#mode').val()) {
+        case 'drag':
+          $('canvas').unbind('mousedown');
+          $('canvas').unbind('mousemove');
+          $('canvas').mousedown(window.originalHandler.clicked);
+          $('canvas').bind('mousemove', window.originalHandler.moved);
+          break
+        case 'spread':
+          $('canvas').unbind('mousedown');
+          $('canvas').unbind('mousemove');
+          $('canvas').mousedown(function(e){
+            var pos = $('canvas').offset();
+            _mouseP = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
+            clicked = window.particleSystem.nearest(_mouseP).distance < window.CLICK_DISTANCE ? particleSystem.nearest(_mouseP) : null
 
+            if (clicked && clicked.node !== null){
+              suppressed = [];
 
-          if (clicked && clicked.node !== null){
-            subs = clicked.node.name.split('_');
-            name = clicked.node.data['name'];
-            if (subs[0] == 'title') {
-              url = '/api/title';
-            } else {
-              url = '/api/actor';
-            }
+              subs = clicked.node.name.split('_');
+              name = clicked.node.data['name'];
+              if (subs[0] == 'title') {
+                url = '/api/title';
+                suppressed = window.HIDDEN_ACTORS.slice(0); // A copy
+              } else {
+                url = '/api/actor';
+                suppressed = window.HIDDEN_TITLES.slice(0); // A copy
+              }
 
-            neighbours = [];
-            $.each(
-                window.sys.getEdgesFrom(clicked.node),
-                function(i, e) {
-                    neighbours.push(e.target.name);
-                });
-            $.each(
-                window.sys.getEdgesTo(clicked.node),
-                function(i, e) {
-                    neighbours.push(e.source.name);
-                });
-
-            // TODO - extract this common logic from here and the initial setup step
-            $.post(url, {'id':subs[1],'name':name,'neighbours':neighbours}, function(data) {
-              nodes = data['data']['nodes'];
-              edges = data['data']['edges'];
-
-              $.each(nodes, function(i, e) {
-                window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[]});
-              })
-
-              $.each(edges, function(i, e) {
-                window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
-                if (!e['name']) {
-                  node1 = window.sys.getNode(e['nodes'][0])
-                  node2 = window.sys.getNode(e['nodes'][1])
-                  if (node1['name'].startsWith('actor')) {
-                    actorId = node1['name'].replace('actor_','');
-                    titleId = node2['name'].replace('title_','');
-                  } else {
-                    actorId = node2['name'].replace('actor_','');
-                    titleId = node1['name'].replace('title_','');
-                  }
-                  $.post('/api/characterName', {'actorId':actorId,'titleId':titleId}, function(response) {
-                    // Can't just persist a reference from addEdge, above, because the $.each(edges...) runs in parallel and would overwrite
-                    responseActorId = response['actorId'];
-                    responseTitleId = response['titleId'];
-                    edgesFrom = window.sys.getEdgesFrom('title_' + responseTitleId);
-
-                    for (i=0;i<edgesFrom.length;i++) {
-                      candidateEdge = edgesFrom[i];
-                      if (candidateEdge.target['name'] == 'actor_'+responseActorId) {
-                        candidateEdge['data']['name'] = response['characterName'];
-                      }
-                    }
-
+              $.each(
+                  window.sys.getEdgesFrom(clicked.node),
+                  function(i, e) {
+                      suppressed.push(e.target.name);
                   });
-                }
-              });
-            });
+              $.each(
+                  window.sys.getEdgesTo(clicked.node),
+                  function(i, e) {
+                      suppressed.push(e.source.name);
+                  });
 
-          }});
-        $('canvas').bind('mousemove', function(){});
-      }
+              // TODO - extract this common logic from here and the initial setup step
+              $.post(url, {'id':subs[1],'name':name,'suppressed':suppressed}, function(data) {
+                nodes = data['data']['nodes'];
+                edges = data['data']['edges'];
+
+                $.each(nodes, function(i, e) {
+                  window.sys.addNode(e['id'], {color:e['color'],name:e['name'],originalColor:e['color'],originalW:3,edges:[]});
+                })
+
+                $.each(edges, function(i, e) {
+                  window.sys.addEdge(e['nodes'][0], e['nodes'][1], {name:e['name']})
+                  if (!e['name']) {
+                    node1 = window.sys.getNode(e['nodes'][0])
+                    node2 = window.sys.getNode(e['nodes'][1])
+                    if (node1['name'].startsWith('actor')) {
+                      actorId = node1['name'].replace('actor_','');
+                      titleId = node2['name'].replace('title_','');
+                    } else {
+                      actorId = node2['name'].replace('actor_','');
+                      titleId = node1['name'].replace('title_','');
+                    }
+                    $.post('/api/characterName', {'actorId':actorId,'titleId':titleId}, function(response) {
+                      // Can't just persist a reference from addEdge, above, because the $.each(edges...) runs in parallel and would overwrite
+                      responseActorId = response['actorId'];
+                      responseTitleId = response['titleId'];
+                      edgesFrom = window.sys.getEdgesFrom('title_' + responseTitleId);
+
+                      for (i=0;i<edgesFrom.length;i++) {
+                        candidateEdge = edgesFrom[i];
+                        if (candidateEdge.target['name'] == 'actor_'+responseActorId) {
+                          candidateEdge['data']['name'] = response['characterName'];
+                        }
+                      }
+
+                    });
+                  }
+                });
+              });
+
+            }});
+          $('canvas').bind('mousemove', function(){});
+          break;
+        case 'delete':
+          // Do delete stuff
+          $('canvas').unbind('mousedown');
+          $('canvas').unbind('mousemove');
+          $('canvas').mousedown(function(e){
+            var pos = $('canvas').offset();
+            _mouseP = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
+            clicked = window.particleSystem.nearest(_mouseP).distance < window.CLICK_DISTANCE ? particleSystem.nearest(_mouseP) : null
+
+            if (clicked && clicked.node !== null){
+              name = clicked.node.name
+              if (name.startsWith('title')) {
+                window.HIDDEN_TITLES.push(name);
+              } else {
+                window.HIDDEN_ACTORS.push(name);
+              }
+              window.sys.pruneNode(clicked.node);
+            }
+          });
+          break
+      } // End switch
     });
 
     $('#fadeInDisplayDiv').fadeIn(1000);

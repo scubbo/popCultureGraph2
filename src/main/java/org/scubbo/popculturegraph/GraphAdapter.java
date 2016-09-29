@@ -19,27 +19,27 @@ public class GraphAdapter {
 
     public List<Pair<Title, String>> getPopularNeighboursOfActor(
                 Actor actor,
-                List<String> neighbours)
+                List<String> suppressed)
             throws IOException {
 
         final Collection<Pair<Title, String>> data = dataFetcher.getTitlesForActor(actor.getId());
 
         return data.stream()
-                .filter((t) -> !neighbours.contains(t.getLeft().getId()))
+                .filter((t) -> !suppressed.contains(t.getLeft().getId()))
                 .limit(3)
                 .collect(Collectors.toList());
     }
 
     public List<Pair<Actor, String>> getPopularNeighboursOfTitle(
                 Title title,
-                List<String> neighbours)
+                List<String> suppressed)
             throws IOException {
 
         final Collection<Pair<Actor, String>> data = dataFetcher.getActorsForTitle(title.getId());
 
 
         return data.stream()
-                .filter((a) -> !neighbours.contains(a.getLeft().getId()))
+                .filter((a) -> !suppressed.contains(a.getLeft().getId()))
                 .limit(3)
                 .collect(Collectors.toList());
     }

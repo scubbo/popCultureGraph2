@@ -222,12 +222,12 @@ public class RequestHandler extends AbstractHandler {
     private void callAPIForActor(final Request baseRequest, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         String actorId = request.getParameter("id");
         String name = request.getParameter("name");
-        List<String> neighbours =
-                Arrays.stream(request.getParameterValues("neighbours[]"))
+        List<String> suppressed =
+                Arrays.stream(request.getParameterValues("suppressed[]"))
                         .map(s -> s.substring(s.indexOf("_") + 1))
                         .collect(Collectors.toList());
         List<Pair<Title, String>> popularNeighboursOfActor =
-                adapter.getPopularNeighboursOfActor(new Actor(actorId, name), neighbours);
+                adapter.getPopularNeighboursOfActor(new Actor(actorId, name), suppressed);
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
@@ -268,12 +268,12 @@ public class RequestHandler extends AbstractHandler {
     private void callAPIForTitle(final Request baseRequest, final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         String titleId = request.getParameter("id");
         String name = request.getParameter("name");
-        List<String> neighbours =
-                Arrays.stream(request.getParameterValues("neighbours[]"))
+        List<String> suppressed =
+                Arrays.stream(request.getParameterValues("suppressed[]"))
                 .map(s -> s.substring(s.indexOf("_") + 1))
                 .collect(Collectors.toList());
         List<Pair<Actor, String>> popularNeighboursOfTitle =
-                adapter.getPopularNeighboursOfTitle(new Title(titleId, name), neighbours);
+                adapter.getPopularNeighboursOfTitle(new Title(titleId, name), suppressed);
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
