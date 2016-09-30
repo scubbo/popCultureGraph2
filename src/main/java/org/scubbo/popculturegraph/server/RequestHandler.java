@@ -126,7 +126,21 @@ public class RequestHandler extends AbstractHandler {
         if (splitTarget.length > 2 && splitTarget[2].equals("characterName")) {
             callAPIForCharacterName(baseRequest, request, response);
         }
+        if (splitTarget.length > 2 && splitTarget[2].equals("prune")) {
+            callAPIForPrune(baseRequest, request, response);
+        }
 
+    }
+
+    private void callAPIForPrune(final Request baseRequest, final HttpServletRequest request, final HttpServletResponse response) {
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_OK);
+        baseRequest.setHandled(true);
+
+        String email = request.getParameter("email");
+        String name = request.getParameter("name");
+
+        System.out.println("Got a prune request for " + name + " from " + email);
     }
 
     private void callAPIForCharacterName(final Request baseRequest, final HttpServletRequest request, final HttpServletResponse response) throws IOException {

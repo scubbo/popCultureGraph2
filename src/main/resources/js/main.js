@@ -331,25 +331,11 @@ window.HIDDEN_TITLES = [];
           $('canvas').bind('mousemove', function(){});
           break;
         case 'delete':
-          // Do delete stuff
-          $('canvas').unbind('mousedown');
-          $('canvas').unbind('mousemove');
-          $('canvas').mousedown(function(e){
-            var pos = $('canvas').offset();
-            _mouseP = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
-            clicked = window.particleSystem.nearest(_mouseP).distance < window.CLICK_DISTANCE ? particleSystem.nearest(_mouseP) : null
-
-            if (clicked && clicked.node !== null){
-              name = clicked.node.name
-              if (name.startsWith('title')) {
-                window.HIDDEN_TITLES.push(name);
-              } else {
-                window.HIDDEN_ACTORS.push(name);
-              }
-              window.sys.pruneNode(clicked.node);
-            }
-          });
+          engageDeleteMode(false);
           break
+        case 'prune':
+          engageDeleteMode(true);
+          break;
       } // End switch
     });
 
@@ -358,6 +344,39 @@ window.HIDDEN_TITLES = [];
   })
 
 })(this.jQuery)
+
+function engageDeleteMode(alsoSubmitPruneRequest) {
+  $('canvas').unbind('mousedown');
+  $('canvas').unbind('mousemove');
+  $('canvas').mousedown(function(e){
+    var pos = $('canvas').offset();
+    _mouseP = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
+    clicked = window.particleSystem.nearest(_mouseP).distance < window.CLICK_DISTANCE ? particleSystem.nearest(_mouseP) : null
+
+    if (clicked && clicked.node !== null){
+
+      if (alsoSubmitPruneRequest) {
+        email = prompt('Thanks for your prune request! If you\'d like to take credit for it, leave your email address below (Optional)')
+        if (email == null) {
+          return;
+        }
+      }
+
+      name = clicked.node.name
+      if (name.startsWith('title')) {
+        window.HIDDEN_TITLES.push(name);
+      } else {
+        window.HIDDEN_ACTORS.push(name);
+      }
+      window.sys.pruneNode(clicked.node);
+
+      if (alsoSubmitPruneRequest) {
+        $.post('/api/prune', {'email':email,'name':name});
+      }
+
+    }
+  });
+}
 
 function temporarilyHighlightNode(targetId) {
   node = window.sys.getNode(targetId)
