@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
 import java.util.Calendar;
@@ -36,24 +35,26 @@ public class DatabaseConnector {
 
     public DatabaseConnector() {
         this("jdbc:sqlite:test.db");
+
     }
 
     @VisibleForTesting
     public DatabaseConnector(String connectionString) {
         this.connectionString = connectionString;
 
-        Connection c = null;
-        Statement stmt = null;
-        String sql = null;
-
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection(this.connectionString);
+        } catch (ClassNotFoundException e) {
+            System.err.println("JDBC driver not found");
+            System.exit(1);
+        }
+
+        try (Connection c = DriverManager.getConnection(this.connectionString)) {
             c.setAutoCommit(false);
 
-            stmt = c.createStatement();
-            sql = "SELECT name FROM sqlite_master WHERE type='table'";
-            ResultSet resultSet = stmt.executeQuery(sql);
+            Statement getTableNamesStmt = c.createStatement();
+            String getTableNamesSQL = "SELECT name FROM sqlite_master WHERE type='table'";
+            ResultSet resultSet = getTableNamesStmt.executeQuery(getTableNamesSQL);
             Boolean hasTitleTable = false;
             Boolean hasActorTable = false;
             while (resultSet.next()) {
@@ -66,47 +67,42 @@ public class DatabaseConnector {
                 }
             }
             resultSet.close();
-            stmt.close();
+            getTableNamesStmt.close();
 
             if (!hasTitleTable) {
-                stmt = c.createStatement();
-                sql = "CREATE TABLE actors_for_title " +
+                try (Statement stmt = c.createStatement()) {
+                    stmt.executeUpdate(
+                        "CREATE TABLE actors_for_title " +
                         "(id INT PRIMARY KEY NOT NULL," +
                         "actors BLOB NOT NULL," +
-                        "date INT NOT NULL)";
-                stmt.executeUpdate(sql);
-                c.commit();
-                stmt.close();
+                        "date INT NOT NULL)"
+                    );
+                    c.commit();
+                }
             }
 
             if (!hasActorTable) {
-                stmt = c.createStatement();
-                sql = "CREATE TABLE titles_for_actor " +
+                try (Statement stmt = c.createStatement()) {
+                    stmt.executeUpdate(
+                        "CREATE TABLE titles_for_actor " +
                         "(id INT PRIMARY KEY NOT NULL," +
                         "titles BLOB NOT NULL," +
-                        "date INT NOT NULL)";
-                stmt.executeUpdate(sql);
-                c.commit();
-                stmt.close();
+                        "date INT NOT NULL)"
+                    );
+                    c.commit();
+                }
             }
-
-            c.close();
 
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(0);
+            System.exit(1);
         }
     }
 
     public Pair<Instant, Collection<Pair<Actor, String>>> getActorsForTitle(String id) {
-        Connection c = null;
-        Statement stmt = null;
-        try {
-            try {
-                Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection(connectionString);
+        try (Connection c = DriverManager.getConnection(connectionString)) {
+            try (Statement stmt = c.createStatement()) {
 
-                stmt = c.createStatement();
                 String sql = "SELECT actors, date FROM actors_for_title WHERE id='" + id + "'";
                 final ResultSet resultSet = stmt.executeQuery(sql);
                 if (resultSet.next()) {
@@ -125,99 +121,53 @@ public class DatabaseConnector {
                 } else {
                     return null;
                 }
-
-            } catch (Exception e) {
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
-                System.exit(0);
             }
-
-            return null;
-
-        } finally {
-
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(1);
         }
+        return null; // Keep IntelliJ happy
     }
 
     public void setActorsForTitle(Collection<Pair<Actor, String>> actors, String titleId) {
-        Connection c = null;
-        PreparedStatement stmt = null;
-        try {
-            try {
-                Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection(connectionString);
-                c.setAutoCommit(false);
+        try (Connection c = DriverManager.getConnection(connectionString)) {
+            c.setAutoCommit(false);
 
-                try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-                    try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-                        oos.writeObject(actors);
-                        oos.flush();
-                        oos.close();
+            try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+                    oos.writeObject(actors);
+                    oos.flush();
+                    oos.close();
 
-                        if (getActorsForTitle(titleId) != null) {
-                            stmt = c.prepareStatement("UPDATE actors_for_title SET actors=?, date=? WHERE id='" + titleId + "'");
+                    if (getActorsForTitle(titleId) != null) {
+                        try (PreparedStatement stmt = c.prepareStatement("UPDATE actors_for_title SET actors=?, date=? WHERE id='" + titleId + "'")) {
                             stmt.setBytes(1, bos.toByteArray());
                             stmt.setDate(2, new java.sql.Date(Calendar.getInstance().getTimeInMillis()));
-                        } else {
-                            stmt = c.prepareStatement("INSERT INTO actors_for_title (id, actors, date) VALUES (?, ?, ?)");
+                            stmt.execute();
+                        }
+                    } else {
+                        try (PreparedStatement stmt = c.prepareStatement("INSERT INTO actors_for_title (id, actors, date) VALUES (?, ?, ?)")) {
                             stmt.setString(1, titleId);
                             stmt.setBytes(2, bos.toByteArray());
                             stmt.setDate(3, new java.sql.Date(Calendar.getInstance().getTimeInMillis()));
+                            stmt.execute();
                         }
-
-                        stmt.execute();
-                        c.commit();
-
                     }
-                }
 
-            } catch (Exception e){
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
-                System.exit(0);
-            }
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+                    c.commit();
 
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 }
             }
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(1);
         }
     }
 
     public Pair<Instant, Collection<Pair<Title, String>>> getTitlesForActor(String id) {
-        Connection c = null;
-        Statement stmt = null;
-        try {
-            try {
-                Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection(connectionString);
+        try (Connection c = DriverManager.getConnection(connectionString)) {
+            try (Statement stmt = c.createStatement()) {
 
-                stmt = c.createStatement();
                 String sql = "SELECT titles, date FROM titles_for_actor WHERE id='" + id + "'";
                 final ResultSet resultSet = stmt.executeQuery(sql);
                 if (resultSet.next()) {
@@ -236,128 +186,68 @@ public class DatabaseConnector {
                 } else {
                     return null;
                 }
-
-            } catch (Exception e) {
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
-                System.exit(0);
             }
-
-            return null;
-
-        } finally {
-
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(1);
         }
+
+        return null;
+
     }
 
     public void setTitlesForActor(Collection<Pair<Title, String>> titles, String actorId) {
-        Connection c = null;
-        PreparedStatement stmt = null;
-        try {
-            try {
-                Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection(connectionString);
-                c.setAutoCommit(false);
+        try (Connection c = DriverManager.getConnection(connectionString)) {
+            c.setAutoCommit(false);
 
-                try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-                    try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-                        oos.writeObject(titles);
-                        oos.flush();
-                        oos.close();
+            try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+                    oos.writeObject(titles);
+                    oos.flush();
+                    oos.close();
 
-                        if (getTitlesForActor(actorId) != null) {
-                            stmt = c.prepareStatement("UPDATE titles_for_actor SET titles=?, date=? WHERE id='" + actorId + "'");
+                    if (getTitlesForActor(actorId) != null) {
+                        try (PreparedStatement stmt = c.prepareStatement("UPDATE titles_for_actor SET titles=?, date=? WHERE id='" + actorId + "'")) {
                             stmt.setBytes(1, bos.toByteArray());
                             stmt.setDate(2, new java.sql.Date(Calendar.getInstance().getTimeInMillis()));
-                        } else {
-                            stmt = c.prepareStatement("INSERT INTO titles_for_actor (id, titles, date) VALUES (?, ?, ?)");
+                            stmt.execute();
+                        }
+                    } else {
+                        try (PreparedStatement stmt = c.prepareStatement("INSERT INTO titles_for_actor (id, titles, date) VALUES (?, ?, ?)")) {
                             stmt.setString(1, actorId);
                             stmt.setBytes(2, bos.toByteArray());
                             stmt.setDate(3, new java.sql.Date(Calendar.getInstance().getTimeInMillis()));
+                            stmt.execute();
                         }
-
-                        stmt.execute();
-                        c.commit();
-
                     }
-                }
 
-            } catch (Exception e){
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
-                System.exit(0);
-            }
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+                    c.commit();
 
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 }
             }
+        } catch (Exception e){
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(1);
         }
     }
 
     @VisibleForTesting
     void clearTables() {
-        Connection c = null;
         PreparedStatement stmt = null;
-        try {
-            try {
-                Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection(connectionString);
-                c.setAutoCommit(false);
+        try (Connection c = DriverManager.getConnection(connectionString)){
+            c.setAutoCommit(false);
 
-                stmt = c.prepareStatement("DELETE FROM actors_for_title;");
-                stmt.execute();
+            stmt = c.prepareStatement("DELETE FROM actors_for_title;");
+            stmt.execute();
 
-                stmt = c.prepareStatement("DELETE FROM titles_for_actor;");
-                stmt.execute();
+            stmt = c.prepareStatement("DELETE FROM titles_for_actor;");
+            stmt.execute();
 
-                c.commit();
-
-            } catch (Exception e){
-                System.err.println(e.getClass().getName() + ": " + e.getMessage());
-                System.exit(0);
-            }
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+            c.commit();
+            stmt.close();
+        } catch (Exception e){
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(1);
         }
     }
 }
