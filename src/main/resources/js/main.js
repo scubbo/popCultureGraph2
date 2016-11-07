@@ -280,7 +280,9 @@ window.HIDDEN_TITLES = [];
                   });
 
               // TODO - extract this common logic from here and the initial setup step
+              $('body').css('cursor','progress');
               $.post(url, {'id':subs[1],'name':name,'suppressed':suppressed}, function(data) {
+                $('body').css('cursor','auto');
                 nodes = data['data']['nodes'];
                 edges = data['data']['edges'];
 
