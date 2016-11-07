@@ -104,15 +104,6 @@ window.HIDDEN_TITLES = [];
         // no-nonsense drag and drop (thanks springy.js)
         var dragged = null;
 
-        function markNodeSelected(node, truth) {
-          node.data.selected = truth;
-          width = truth ? node.data.originalW + 10: node.data.originalW
-          particleSystem.tweenNode(node, 0.1, {w:width});
-          $.each(node.data.edges, function(index,elem) {
-            elem.data.showName = truth;
-          });
-        }
-
         // set up a handler object that will initially listen for mousedowns then
         // for moves and mouseups while dragging
         var handler = {
@@ -328,7 +319,17 @@ window.HIDDEN_TITLES = [];
               });
 
             }});
-          $('canvas').bind('mousemove', function(){});
+            // Below is duplicated from the originalHandler - find a way to factor it out.
+          $('canvas').bind('mousemove', function(e) {
+            var pos = $('canvas').offset();
+            _mouseP = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
+            nearest = particleSystem.nearest(_mouseP)
+            if (nearest != null && !nearest.node) return false
+            if (nearest != null) {
+              withinRange = nearest.distance < nearest.node.data.w // This is a HORRIBLE hack and there should be a better way
+              markNodeSelected(nearest.node, !!withinRange);
+            }
+          });
           break;
         case 'delete':
           engageDeleteMode(false);
@@ -375,6 +376,15 @@ function engageDeleteMode(alsoSubmitPruneRequest) {
       }
 
     }
+  });
+}
+
+function markNodeSelected(node, truth) {
+  node.data.selected = truth;
+  width = truth ? node.data.originalW + 10: node.data.originalW
+  particleSystem.tweenNode(node, 0.1, {w:width});
+  $.each(node.data.edges, function(index,elem) {
+    elem.data.showName = truth;
   });
 }
 
