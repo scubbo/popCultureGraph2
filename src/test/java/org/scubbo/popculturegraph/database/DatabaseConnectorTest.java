@@ -53,6 +53,7 @@ public class DatabaseConnectorTest {
     public void testUpdate() throws Exception {
         connector.setActorsForTitle(TEST_ACTOR_LIST_1, "test-title-id-1");
         Pair<Instant, Collection<Pair<Actor, String>>> actorResponse1 = connector.getActorsForTitle("test-title-id-1");
+        Thread.sleep(1000);
         connector.setActorsForTitle(TEST_ACTOR_LIST_2, "test-title-id-1");
         Pair<Instant, Collection<Pair<Actor, String>>> actorResponse2 = connector.getActorsForTitle("test-title-id-1");
         assertThat(actorResponse2.getLeft()).isGreaterThan(actorResponse1.getLeft());
@@ -60,6 +61,7 @@ public class DatabaseConnectorTest {
 
         connector.setTitlesForActor(TEST_TITLE_LIST_1, "test-actor-id-1");
         Pair<Instant, Collection<Pair<Title, String>>> titleResponse1 = connector.getTitlesForActor("test-actor-id-1");
+        Thread.sleep(1000);
         connector.setTitlesForActor(TEST_TITLE_LIST_2, "test-actor-id-1");
         Pair<Instant, Collection<Pair<Title, String>>> titleResponse2 = connector.getTitlesForActor("test-actor-id-1");
         assertThat(titleResponse2.getLeft()).isGreaterThan(titleResponse1.getLeft());
