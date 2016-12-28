@@ -4,7 +4,7 @@ body {
 }
 
 #initialInputDiv {
-  background-color: #00f;
+  background-color: #555;
   height: 100%;
   width: 100%;
 }
@@ -30,9 +30,19 @@ body {
   display: none;
 }
 
+#topDiv {
+  height: 50px;
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#bbbbbb+0,ffffff+90,ffffff+100 */
+  background: #bbbbbb; /* Old browsers */
+  background: -moz-linear-gradient(top,  #bbbbbb 0%, #ffffff 90%, #ffffff 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top,  #bbbbbb 0%,#ffffff 90%,#ffffff 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom,  #bbbbbb 0%,#ffffff 90%,#ffffff 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#bbbbbb', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
+}
+
 #mode {
   position: fixed;
-  top: 0%;
+  top: 8px;
   left: 50%;
   transform: translate(-50%, 0);
 }
@@ -40,34 +50,41 @@ body {
 #whatLink {
   position: fixed;
   top: 0%;
-  left: 0%;
+  left: 2%;
 }
 
 #whoLink {
   position: fixed;
   top: 0%;
-  right: 0%;
+  right: 2%;
+}
+
+.nonLinkingA {
+  text-decoration: none;
+  font-weight: bold;
+  color: #fff;
+  line-height:30px;
 }
 
 #whatDiv {
   position: absolute;
-  top: 0%;
+  top: 5%;
   left: 0%;
   z-index: 20;
 }
 
 #whoDiv {
   position: absolute;
-  top: 0%;
+  top: 5%;
   right: 0%;
   z-index:20;
 }
 
 .hiddenDiv {
   display: none;
-  border: 1px solid #00f;
+  border: 1px solid #eee;
   border-radius: 10px;
-  background-color: #00c;
+  background-color: #999;
   width: 500px;
   padding: 20px;
   color: white;
